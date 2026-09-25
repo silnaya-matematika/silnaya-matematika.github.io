@@ -60,6 +60,15 @@
   }
   .brand-pill .sep { margin: 0 8px; opacity: 0.6; }
   .brand-pill .part { white-space: nowrap; }
+  .avatar {
+    position: relative; display: block; width: 112px; height: 112px; margin: 0 auto 16px;
+    border-radius: 50%; padding: 4px; background: rgba(255,255,255,0.9);
+    box-shadow: 0 10px 26px -12px rgba(30, 15, 80, 0.75);
+    transition: transform .15s ease;
+  }
+  .avatar:hover, .avatar:focus-visible { transform: scale(1.04); outline: none; }
+  .avatar img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  @media (max-width: 480px) { .avatar { width: 96px; height: 96px; } }
   @media (max-width: 480px) {
     .brand-pill { border-radius: 16px; padding: 7px 16px; line-height: 1.5; }
     .brand-pill .part { display: block; }
@@ -174,6 +183,7 @@
   <span class="formula f1">a² + b²</span>
   <span class="formula f2">∫ f(x)dx</span>
   <span class="formula f3">log₂ 8 = 3</span>
+  <a class="avatar" href="https://t.me/kuznetsova_math_100" target="_blank" rel="noopener" aria-label="Telegram-канал «Сильная математика»"><img src="avatar.jpg" alt="Людмила Кузнецова" width="112" height="112"></a>
   <span class="brand-pill"><span class="part">Сильная математика</span><span class="sep">|</span><span class="part">Людмила Кузнецова</span></span>
   <h1>Тренировочные тесты</h1>
   <p>Решайте прямо в браузере: ответы проверяются автоматически, результат можно сразу отправить учителю.</p>
