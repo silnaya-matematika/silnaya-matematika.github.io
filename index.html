@@ -125,6 +125,24 @@
     margin-top: 12px; padding-top: 20px; border-top: 1.5px dashed var(--hairline);
     text-align: center; color: var(--accent); font-weight: 700; font-size: 1.05rem;
   }
+  .tg-btn {
+    position: relative; display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
+    background: #fff; color: var(--accent-deep); text-decoration: none;
+    font-family: var(--sans); font-weight: 700; font-size: 0.98rem;
+    padding: 11px 20px; border-radius: 999px;
+    box-shadow: 0 8px 20px -10px rgba(30, 15, 80, 0.6);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .tg-btn svg { color: #2aabee; }
+  .tg-btn:hover, .tg-btn:focus-visible { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(30, 15, 80, 0.7); outline: none; }
+  .tg-link {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+    color: var(--accent); font-family: var(--sans); font-size: 0.92rem; font-weight: 600;
+    text-decoration: none; border-bottom: 1px solid var(--hairline); padding-bottom: 1px;
+  }
+  .tg-link svg { color: #2aabee; width: 18px; height: 18px; }
+  .tg-link:hover { border-bottom-color: var(--accent); }
+  footer .tg-row { display: block; }
   footer small { display: block; margin-top: 6px; color: var(--muted); font-weight: 400; font-family: var(--sans); font-size: 0.8rem; }
 
   @media (max-width: 640px) {
@@ -159,6 +177,7 @@
   <span class="brand-pill"><span class="part">Сильная математика</span><span class="sep">|</span><span class="part">Людмила Кузнецова</span></span>
   <h1>Тренировочные тесты</h1>
   <p>Решайте прямо в браузере: ответы проверяются автоматически, результат можно отправить в&nbsp;Telegram.</p>
+  <a class="tg-btn" href="https://t.me/kuznetsova_math_100" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.3 13 1.5 11.5c-1-.3-1.1-1 .2-1.5L20.5 2.8c.9-.3 1.6.2 1.4 1.5Z"/></svg><span>Мой Telegram-канал</span></a>
 </header>
 
 <div class="steps">
@@ -223,6 +242,8 @@
   </div>
 </section>
 
-<footer>Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова<small>Удачи на экзаменах!</small></footer>
+<footer>Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова
+  <span class="tg-row"><a class="tg-link" href="https://t.me/kuznetsova_math_100" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.2L6.3 13 1.5 11.5c-1-.3-1.1-1 .2-1.5L20.5 2.8c.9-.3 1.6.2 1.4 1.5Z"/></svg><span>@kuznetsova_math_100</span></a></span>
+  <small>Удачи на экзаменах!</small></footer>
 </div>
 </body></html>
