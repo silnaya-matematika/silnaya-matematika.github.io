@@ -56,7 +56,14 @@
     display: inline-block; font-family: var(--sans); font-size: 0.8rem; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase;
     background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
-    padding: 6px 14px; border-radius: 999px; margin-bottom: 16px;
+    padding: 6px 14px; border-radius: 999px; margin-bottom: 16px; position: relative;
+  }
+  .brand-pill .sep { margin: 0 8px; opacity: 0.6; }
+  .brand-pill .part { white-space: nowrap; }
+  @media (max-width: 480px) {
+    .brand-pill { border-radius: 16px; padding: 7px 16px; line-height: 1.5; }
+    .brand-pill .part { display: block; }
+    .brand-pill .sep { display: none; }
   }
   .hero h1 { font-size: clamp(1.45rem, 6.5vw, 2.4rem); overflow-wrap: anywhere; margin: 0 0 10px; line-height: 1.2; position: relative; }
   .hero p { margin: 0 auto; max-width: 460px; font-size: 1.05rem; line-height: 1.5; opacity: 0.92; position: relative; }
@@ -149,7 +156,7 @@
   <span class="formula f1">a² + b²</span>
   <span class="formula f2">∫ f(x)dx</span>
   <span class="formula f3">log₂ 8 = 3</span>
-  <span class="brand-pill">Сильная математика</span>
+  <span class="brand-pill"><span class="part">Сильная математика</span><span class="sep">|</span><span class="part">Людмила Кузнецова</span></span>
   <h1>Тренировочные тесты</h1>
   <p>Решайте прямо в браузере: ответы проверяются автоматически, результат можно отправить в&nbsp;Telegram.</p>
 </header>
