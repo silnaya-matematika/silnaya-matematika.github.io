@@ -69,7 +69,7 @@
   #controls {
     background: var(--bg);
     padding: 12px 0;
-    margin-bottom: 20px;
+    margin: 24px 0 0;
     display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     justify-content: center;
     font-family: -apple-system, Segoe UI, Arial, sans-serif;
@@ -158,12 +158,6 @@
 <div class="sheet"><noscript><div style="background:#fdecea;color:#8a1c12;border:1px solid #f5c2bc;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-family:-apple-system,Arial,sans-serif;">Проверка ответов здесь не работает. Откройте тест по ссылке в браузере (Safari или Chrome).</div></noscript>
 <h1>Алгебра, 7 класс: одночлены</h1>
 <div class="variant-badge">Вариант 1</div>
-<div id="controls">
-  <button onclick="checkAll()">Проверить ответы</button>
-  <button class="secondary" onclick="copyResults()">Скопировать результат</button>
-  <span id="score"></span>
-  <span id="copyStatus"></span>
-</div>
 <div class="hint">Степень пишите через ^ : <b>-6a^3b^2</b> (можно и −6a³b²). Дроби — через / : <b>1/2</b>, десятичные — через запятую: <b>0,5</b>.</div>
 <form id="testForm" onsubmit="return false;">
 <div class="sheet-card">
@@ -249,6 +243,12 @@
 </div>
 </div>
 </form>
+<div id="controls">
+  <button onclick="checkAll()">Проверить ответы</button>
+  <button class="secondary" onclick="copyResults()">Скопировать результат</button>
+  <span id="score"></span>
+  <span id="copyStatus"></span>
+</div>
 <footer class="brand">Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова</footer>
 </div>
 <script>
