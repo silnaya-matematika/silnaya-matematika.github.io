@@ -323,24 +323,86 @@
 <footer class="brand">Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова</footer>
 </div>
 <script>
-const ANSWERS = {"1": "68", "2": "1", "3": "7", "4": "-3", "5": "-4", "6": "3", "7": "0", "8": "1", "9": "-11", "10": "125", "11": "0", "12": "46", "13": "46", "14": "0", "15": "43", "16": "-41", "17": "35", "18": "1", "19": "-23", "20": "1"};
-function norm(s) {
-  return (s || "").toString().trim().toLowerCase().replace(/\s+/g, " ").replace(",", ".");
+const SEED = 1417694851;
+const HASHES = {"1": [5954854261205185], "2": [1349862367626704], "3": [2711502208370420], "4": [2199948838870290], "5": [7818354449555048], "6": [4837453199910564], "7": [2226273352329695], "8": [4438139797237904], "9": [6657128617101606], "10": [2416549332534496], "11": [7044170779827344], "12": [4618822325701478], "13": [2122256034551010], "14": [2840227051873610], "15": [7099362988478951], "16": [3720293985898006], "17": [6151891052316082], "18": [7427419252844412], "19": [2251602228907768], "20": [1365519653926654]};
+function cyrb53(str, seed) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+const SUP = {"⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9"};
+const CYR = {"а":"a","в":"b","с":"c","х":"x","у":"y","р":"p","о":"o","е":"e","к":"k","м":"m","т":"t"};
+function norm(raw) {
+  let s = (raw || "").toString().toLowerCase();
+  s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, t => "^" + [...t].map(c => SUP[c]).join(""));
+  s = s.replace(/[авсхуроекмт]/g, c => CYR[c]);
+  s = s.replace(/[−–—]/g, "-").replace(/,/g, ".").replace(/[\s*·⋅×]/g, "");
+  return s;
+}
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+function parseRat(s) {
+  const m = s.match(/^([+-]?)(\d+)(?:\.(\d+))?(?:\/(\d+)(?:\.(\d+))?)?$/);
+  if (!m) return null;
+  const dec = m[3] || "";
+  let n = parseInt(m[2] + dec, 10), d = Math.pow(10, dec.length);
+  if (m[4] !== undefined) {
+    const dec2 = m[5] || "";
+    const n2 = parseInt(m[4] + dec2, 10), d2 = Math.pow(10, dec2.length);
+    if (n2 === 0) return null;
+    n = n * d2; d = d * n2;
+  }
+  if (m[1] === "-") n = -n;
+  const g = gcd(n, d);
+  return [n / g, d / g];
+}
+function parseMono(s) {
+  const m = s.match(/^([+-]?)(?:\(([^)]*)\)|(\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?))?((?:[a-z](?:\^\d+)?)*)$/);
+  if (!m) return null;
+  const coefStr = m[2] !== undefined ? m[2] : m[3];
+  if (!coefStr && !m[4]) return null;
+  let coef = coefStr ? parseRat(coefStr) : [1, 1];
+  if (!coef) return null;
+  if (m[1] === "-") coef = [-coef[0], coef[1]];
+  const vars = {};
+  for (const t of m[4].matchAll(/([a-z])(?:\^(\d+))?/g)) {
+    vars[t[1]] = (vars[t[1]] || 0) + (t[2] ? parseInt(t[2], 10) : 1);
+  }
+  const letters = Object.keys(vars).sort().filter(k => vars[k]).map(k => k + "^" + vars[k]).join("");
+  return "m:" + coef[0] + "/" + coef[1] + "|" + letters;
+}
+function candidates(raw) {
+  const s = norm(raw);
+  const out = ["s:" + s];
+  const r = parseRat(s.replace(/^\((.*)\)$/, "$1"));
+  if (r) out.push("n:" + r[0] + "/" + r[1]);
+  const mono = parseMono(s);
+  if (mono) out.push(mono);
+  return out;
+}
+function isCorrect(taskNo, raw) {
+  if (!raw.trim()) return false;
+  const good = HASHES[taskNo];
+  return candidates(raw).some(c => good.includes(cyrb53(taskNo + ":" + c, SEED)));
 }
 function computeResults() {
   let correctCount = 0;
   const rows = [];
-  for (const taskNo in ANSWERS) {
+  for (const taskNo in HASHES) {
     const input = document.getElementById("input_" + taskNo);
-    const userVal = norm(input.value);
-    const correctVal = norm(ANSWERS[taskNo]);
-    const isCorrect = userVal.length > 0 && userVal === correctVal;
-    if (isCorrect) correctCount++;
-    rows.push({ taskNo, isCorrect, userAnswer: input.value.trim(), correctAnswer: ANSWERS[taskNo] });
+    const ok = isCorrect(taskNo, input.value);
+    if (ok) correctCount++;
+    rows.push({ taskNo, isCorrect: ok, userAnswer: input.value.trim() });
   }
-  return { correctCount, total: Object.keys(ANSWERS).length, rows };
+  return { correctCount, total: Object.keys(HASHES).length, rows };
 }
-
 function checkAll() {
   const { correctCount, total, rows } = computeResults();
   for (const row of rows) {
@@ -349,41 +411,29 @@ function checkAll() {
       verdict.textContent = "Верно";
       verdict.className = "verdict correct";
     } else {
-      verdict.textContent = "Неверно. Правильный ответ: " + row.correctAnswer;
+      verdict.textContent = row.userAnswer ? "Неверно" : "Нет ответа";
       verdict.className = "verdict wrong";
     }
   }
   document.getElementById("score").textContent = "Результат: " + correctCount + " из " + total;
   document.getElementById("copyStatus").textContent = "";
 }
-
 function copyResults() {
   checkAll();
   const { correctCount, total, rows } = computeResults();
-  const lines = ["Тест ЕГЭ по математике — результат: " + correctCount + " из " + total, ""];
+  const lines = [document.title + " — результат: " + correctCount + " из " + total, ""];
   for (const row of rows) {
-    if (row.isCorrect) {
-      lines.push("✅ №" + row.taskNo);
-    } else {
-      const given = row.userAnswer.length > 0 ? row.userAnswer : "—";
-      lines.push("❌ №" + row.taskNo + " (мой ответ: " + given + ", правильный: " + row.correctAnswer + ")");
-    }
+    if (row.isCorrect) lines.push("✅ №" + row.taskNo + " (" + row.userAnswer + ")");
+    else lines.push("❌ №" + row.taskNo + " (мой ответ: " + (row.userAnswer || "—") + ")");
   }
-  const text = lines.join("\n");
-
   const ta = document.createElement("textarea");
-  ta.value = text;
-  ta.style.position = "fixed";
-  ta.style.opacity = "0";
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
+  ta.value = lines.join("\n");
+  ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
   let ok = false;
   try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
   document.body.removeChild(ta);
-
-  const status = document.getElementById("copyStatus");
-  status.textContent = ok ? "Скопировано! Вставьте в Telegram." : "Не удалось скопировать автоматически — выделите текст вручную.";
+  document.getElementById("copyStatus").textContent = ok ? "Скопировано! Отправьте учителю." : "Не удалось скопировать автоматически — выделите текст вручную.";
 }
 </script>
 </body>
