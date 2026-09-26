@@ -392,19 +392,34 @@ function isCorrect(taskNo, raw) {
   const good = HASHES[taskNo];
   return candidates(raw).some(c => good.includes(cyrb53(taskNo + ":" + c, SEED)));
 }
+// Две попытки: после второй проверки ответы блокируются. Число попыток
+// запоминается в браузере, чтобы перезагрузка страницы их не сбрасывала.
+const MAX_ATTEMPTS = 2;
+const STORE_KEY = "attempts:" + location.pathname + ":" + SEED;
+let state = { attempts: 0, answers: {} };
+let lastResults = null;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { return null; } }
+function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+function inputOf(taskNo) { return document.getElementById("input_" + taskNo); }
+function checkButton() { return document.querySelector('button[onclick^="checkAll"]'); }
+function setStatus(text) { document.getElementById("copyStatus").textContent = text; }
 function computeResults() {
   let correctCount = 0;
   const rows = [];
   for (const taskNo in HASHES) {
-    const input = document.getElementById("input_" + taskNo);
-    const ok = isCorrect(taskNo, input.value);
+    const value = inputOf(taskNo).value;
+    const ok = isCorrect(taskNo, value);
     if (ok) correctCount++;
-    rows.push({ taskNo, isCorrect: ok, userAnswer: input.value.trim() });
+    rows.push({ taskNo, isCorrect: ok, userAnswer: value.trim() });
   }
   return { correctCount, total: Object.keys(HASHES).length, rows };
 }
-function checkAll() {
-  const { correctCount, total, rows } = computeResults();
+function attemptsNote() {
+  const left = MAX_ATTEMPTS - state.attempts;
+  return left > 0 ? " · осталась " + left + " попытка" : " · попытки закончились";
+}
+function showResults() {
+  const { correctCount, total, rows } = lastResults;
   for (const row of rows) {
     const verdict = document.getElementById("verdict_" + row.taskNo);
     if (row.isCorrect) {
@@ -415,13 +430,38 @@ function checkAll() {
       verdict.className = "verdict wrong";
     }
   }
-  document.getElementById("score").textContent = "Результат: " + correctCount + " из " + total;
-  document.getElementById("copyStatus").textContent = "";
+  document.getElementById("score").textContent = "Результат: " + correctCount + " из " + total + attemptsNote();
+}
+function lockIfDone() {
+  if (state.attempts < MAX_ATTEMPTS) return;
+  for (const taskNo in HASHES) inputOf(taskNo).disabled = true;
+  const btn = checkButton();
+  if (btn) { btn.disabled = true; btn.textContent = "Попытки закончились"; btn.style.opacity = "0.55"; btn.style.cursor = "default"; }
+}
+function checkAll() {
+  if (state.attempts >= MAX_ATTEMPTS) return;
+  const answers = {};
+  let filled = 0;
+  for (const taskNo in HASHES) {
+    answers[taskNo] = inputOf(taskNo).value;
+    if (answers[taskNo].trim()) filled++;
+  }
+  if (filled === 0) { setStatus("Сначала решите задания и впишите ответы — попытка не потрачена."); return; }
+  if (state.attempts === MAX_ATTEMPTS - 1 &&
+      !confirm("Это последняя попытка. После проверки ответы нельзя будет изменить. Проверить?")) return;
+  state.attempts++;
+  state.answers = answers;
+  saveState();
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+  setStatus(state.attempts < MAX_ATTEMPTS ? "Исправьте ошибки и проверьте ещё раз." : "");
 }
 function copyResults() {
-  checkAll();
-  const { correctCount, total, rows } = computeResults();
-  const lines = [document.title + " — результат: " + correctCount + " из " + total, ""];
+  if (!lastResults) { setStatus("Сначала нажмите «Проверить ответы»."); return; }
+  const { correctCount, total, rows } = lastResults;
+  const lines = [document.title + " — результат: " + correctCount + " из " + total +
+                 " (попытка " + state.attempts + " из " + MAX_ATTEMPTS + ")", ""];
   for (const row of rows) {
     if (row.isCorrect) lines.push("✅ №" + row.taskNo + " (" + row.userAnswer + ")");
     else lines.push("❌ №" + row.taskNo + " (мой ответ: " + (row.userAnswer || "—") + ")");
@@ -433,8 +473,17 @@ function copyResults() {
   let ok = false;
   try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
   document.body.removeChild(ta);
-  document.getElementById("copyStatus").textContent = ok ? "Скопировано! Отправьте учителю." : "Не удалось скопировать автоматически — выделите текст вручную.";
+  setStatus(ok ? "Скопировано! Отправьте учителю." : "Не удалось скопировать автоматически — выделите текст вручную.");
 }
+(function restore() {
+  const saved = loadState();
+  if (!saved || !saved.attempts) return;
+  state = saved;
+  for (const taskNo in HASHES) if (state.answers[taskNo] !== undefined) inputOf(taskNo).value = state.answers[taskNo];
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+})();
 </script>
 </body>
 </html>
