@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ОГЭ: Теплицы</title>
+<style>
+  :root {
+    --bg: #f5f1fb;
+    --surface: #ffffff;
+    --surface-2: #ece2f9;
+    --ink: #2e2558;
+    --muted: #7c749a;
+    --hairline: #ddceef;
+    --accent: #6a4fc4;
+    --accent-soft: #ece2f9;
+    --correct: #2f8f5b;
+    --wrong: #c0392b;
+    --serif: Georgia, "PT Serif", "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    font-family: var(--serif);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 20px 60px;
+    color: var(--ink);
+    background: var(--bg);
+    position: relative;
+  }
+  .doodle { position: absolute; opacity: 0.5; pointer-events: none; z-index: 0; color: var(--accent); }
+  .doodle-text { font-family: var(--serif); font-weight: 700; font-style: italic; }
+  .doodle-sun   { top: 1%;  left: -64px; }
+  .doodle-bow   { top: 1%;  right: -66px; }
+  .doodle-sqrt  { top: 12%; right: -58px; font-size: 1.7rem; transform: rotate(6deg); }
+  .doodle-heart { top: 16%; left: -54px; }
+  .doodle-x2    { top: 27%; right: -50px; font-size: 1.6rem; transform: rotate(-7deg); }
+  .doodle-dots  { top: 34%; left: -48px; }
+  .doodle-flower{ top: 44%; right: -56px; }
+  .doodle-frac  { top: 52%; left: -50px; font-size: 1.5rem; transform: rotate(5deg); }
+  .doodle-pencil{ top: 63%; right: -60px; }
+  .doodle-star2 { top: 70%; left: -50px; }
+  .doodle-notebook { top: 80%; right: -56px; }
+  .doodle-shell { bottom: 0%; left: -45px; }
+  .doodle-star  { bottom: 1%; right: -48px; }
+  @media (max-width: 1040px) { .doodle { display: none; } }
+
+  .sheet { position: relative; z-index: 1; }
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .variant-badge {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 24px;
+    background: var(--surface-2);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 8px 22px;
+    border-radius: 999px;
+  }
+
+  #controls {
+    background: var(--bg);
+    padding: 12px 0;
+    margin: 24px 0 0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+  }
+  button {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 18px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #5a41ae; }
+  button.secondary { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
+  button.secondary:hover { background: var(--accent-soft); }
+  #score { font-weight: 700; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  #copyStatus { color: var(--correct); font-size: 0.9rem; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+
+  .sheet-card {
+    background: var(--surface);
+    border: 1.5px solid var(--hairline);
+    border-radius: 18px;
+    padding: 8px 26px 4px;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 6px 14px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--hairline);
+  }
+  .task:last-child { border-bottom: none; }
+  .task-num {
+    width: 38px; height: 38px;
+    background: var(--surface-2);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem;
+  }
+  .task-q { padding-top: 5px; line-height: 1.6; }
+  .task-q img { display: inline-block; vertical-align: middle; max-width: 100%; }
+  .answer-row { grid-column: 2; margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  input.ans {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    padding: 8px 10px; font-size: 1rem; border: 1px solid var(--hairline);
+    border-radius: 6px; width: 160px; background: #fff; color: var(--ink);
+  }
+  .verdict { font-weight: 600; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .verdict.correct { color: var(--correct); }
+  .verdict.wrong { color: var(--wrong); }
+
+  footer.brand {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1.5px dashed var(--hairline);
+    text-align: center;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+  }
+
+  .expr { font-size: 1.15rem; white-space: nowrap; display: inline-block; margin: 6px 0 0; }
+  .expr i { font-style: italic; }
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.85em; line-height: 1.1; margin: 0 2px; }
+  .frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 2px; }
+  .hint { text-align: center; color: var(--muted); font-size: 0.9rem; margin: -8px 0 18px; font-family: -apple-system, Segoe UI, Arial, sans-serif; line-height: 1.5; }
+  input.ans { width: 220px; }
+  .task-q { overflow-x: auto; }
+
+  .ctx { background: var(--surface-2); border-radius: 14px; padding: 16px 20px; margin: 0 0 18px; line-height: 1.55; }
+  .ctx h2 { font-size: 1.05rem; margin: 0 0 8px; }
+  .ctx p { margin: 0 0 8px; }
+  .ctx table { border-collapse: collapse; margin: 8px auto; font-size: 0.74rem; background: #fff; }
+  .ctx th, .ctx td { border: 1px solid #b9a9e0; padding: 2px 5px; text-align: center; }
+  .ctx .scroll { overflow-x: auto; }
+  .task-q table { border-collapse: collapse; margin: 8px 0; font-size: 0.9rem; }
+  .task-q th, .task-q td { border: 1px solid #b9a9e0; padding: 3px 8px; text-align: center; }
+  .task-q img { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<svg class="doodle doodle-sun" width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="23" cy="23" r="9"/><path d="M23 2v7M23 37v7M2 23h7M37 23h7M8 8l5 5M33 33l5 5M38 8l-5 5M13 33l-5 5"/></svg>
+<svg class="doodle doodle-bow" width="50" height="42" viewBox="0 0 50 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M25 18c-6-10-22-10-22 0 0 8 14 8 22 14 8-6 22-6 22-14 0-10-16-10-22 0Z"/><path d="M25 18v22"/></svg>
+<svg class="doodle doodle-shell" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 6c9 3 15 11 15 21H6c0-10 6-18 15-21Z"/><path d="M21 8v19M14 12l3 15M28 12l-3 15"/></svg>
+<svg class="doodle doodle-star" width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<span class="doodle doodle-text doodle-sqrt">&radic;a</span>
+<svg class="doodle doodle-heart" width="36" height="32" viewBox="0 0 36 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 29C7 21 2 15 2 9.5 2 4.8 5.6 2 9.6 2c3 0 5.8 1.8 8.4 6 2.6-4.2 5.4-6 8.4-6 4 0 7.6 2.8 7.6 7.5 0 5.5-5 11.5-16 19.5Z"/></svg>
+<span class="doodle doodle-text doodle-x2">x&sup2;</span>
+<svg class="doodle doodle-dots" width="34" height="34" viewBox="0 0 34 34" fill="currentColor"><circle cx="4" cy="6" r="2.2"/><circle cx="16" cy="4" r="2.2"/><circle cx="28" cy="9" r="2.2"/><circle cx="8" cy="18" r="2.2"/><circle cx="22" cy="20" r="2.2"/><circle cx="14" cy="30" r="2.2"/></svg>
+<svg class="doodle doodle-flower" width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="3.4"/><ellipse cx="19" cy="8" rx="4.4" ry="6.5"/><ellipse cx="19" cy="30" rx="4.4" ry="6.5"/><ellipse cx="8" cy="19" rx="6.5" ry="4.4"/><ellipse cx="30" cy="19" rx="6.5" ry="4.4"/></svg>
+<span class="doodle doodle-text doodle-frac">a&frasl;b</span>
+<svg class="doodle doodle-pencil" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 35l1.5-8L28 7.5l6.5 6.5L15 34.5 7 36Z"/><path d="M25.5 10.5l6.5 6.5M8.5 27l6.5 6.5"/></svg>
+<svg class="doodle doodle-star2" width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<svg class="doodle doodle-notebook" width="34" height="40" viewBox="0 0 34 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="26" height="36" rx="2.5"/><path d="M10 12h14M10 19h14M10 26h9"/></svg>
+
+<div class="sheet"><noscript><div style="background:#fdecea;color:#8a1c12;border:1px solid #f5c2bc;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-family:-apple-system,Arial,sans-serif;">Проверка ответов здесь не работает. Откройте тест по ссылке в браузере (Safari или Chrome).</div></noscript>
+<h1>ОГЭ, математика: практико-ориентированные задачи</h1>
+<div class="variant-badge">Теплицы · вариант 1</div>
+<div class="hint">Прочитайте внимательно текст и выполните задания 1–5. Ответ в каждом задании — число; если нужно, округлите, как сказано в условии.</div>
+<div class="ctx"><p><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9ItCh0LvQvtC5XzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMjMycHgiIGhlaWdodD0iMTE2cHgiIHZpZXdCb3g9IjExLjUzMSAzMS4wNjMgMjMyIDExNiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAxMS41MzEgMzEuMDYzIDIzMiAxMTYiDQoJIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHJlY3QgeD0iNTcuNjY3IiB5PSI2My44NDgiIG9wYWNpdHk9IjAuNSIgZmlsbD0iI0ZGODgwMCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAgICAiIHdpZHRoPSI3MC42NjciIGhlaWdodD0iNjEuOTY1Ii8+DQo8cGF0aCBvcGFjaXR5PSIwLjciIGZpbGw9IiNGRjg4MDAiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgICAgIiBkPSJNMjM2LjMzNiw4Mi43MTFjLTAuMTU0LTAuNjYxLDAuMTA0LTEuMTg0LDAuNTIxLTEuNTA4DQoJYy0wLjcyMS0yLjE2NC0xLjc5MS00LjM1Mi0yLjE5OC02LjEwNGMtMC45MTgtMy45NDQtMS44OTQtNy42Ny0zLjkyMy0xMS4yMTljLTAuMTIzLTAuMjE3LTAuMTg4LTAuNDMxLTAuMjAzLTAuNjM2DQoJYy0wLjEzMy0wLjExNy0wLjI0OS0wLjI3MS0wLjMzOC0wLjQ2OGMtMS4zNTItMy4wMTItMy4xMTctNS41MTQtNC44OTctOC4yNjRjLTAuOTExLTEuNDA3LTEuOTU1LTIuNTI3LTIuMTU3LTQuMDM0DQoJYy0wLjI0Mi0wLjExOC0wLjQ1OS0wLjMzMi0wLjYxMS0wLjY2MWMtMC43MTctMS41NDItMi4zNDgtMi4zNjYtMy40NzUtMy41M2MtMi4xNDQtMi4yMTItNC4xMjMtNC4wNTYtNi43NjQtNS43MjENCgljLTQuMjA1LTIuNjUyLTkuMTQ4LTUuMjAyLTE0LjIxNy01LjUwNmMtMC42LTAuMDM2LTEuMDE0LTAuMzU0LTEuMjQtMC43NjloLTQuNjY0Yy0wLjEwMiwwLjA2LTAuMjEsMC4xMTItMC4zMzMsMC4xNTMNCgljLTQuMDI0LDEuMzI3LTguNDY3LDEuMjc0LTEyLjU5OSwyLjE5Yy0zLjYxNCwwLjgwMS03LjIwOSwxLjY4LTEwLjg0LDIuNDA0Yy0wLjE0MiwwLjAyOC0wLjI3MywwLjAzMy0wLjQwMiwwLjAyNw0KCWMtMC4xNjQsMC4xNzYtMC4zNzcsMC4zMjMtMC42NTksMC40MTFjLTUuNzksMS44MS0xMi4yMTIsMi4zODYtMTguMTcyLDMuNTM1Yy02LjM4NiwxLjIzMS0xMi43MjksMi42NjktMTkuMTQyLDMuNzc4DQoJYy0wLjM0OCwwLjA2LTAuNjU3LDAuMDEtMC45MjItMC4xMTFjLTAuMDQ3LDAuMDE2LTAuMDksMC4wMzYtMC4xNDEsMC4wNDljLTMuNTIzLDAuODU3LTcuMTMzLDEuMTcyLTEwLjY0MywyLjA5Mg0KCWMtMy41MTEsMC45Mi02LjkyNywxLjg2My0xMC41NjgsMi4wMjRjLTAuMTk0LDAuMDA5LTAuMzY0LTAuMDIxLTAuNTE5LTAuMDY4Yy0wLjIxNiwwLjA4LTAuNDMyLDAuMTU0LTAuNjQ4LDAuMjQxDQoJYy0xLjM3MywwLjU1MS0yLjg2NywwLjU0Mi00LjI0NiwxLjA4NmMtMC4zODUsMC4xNTItMC43MTgsMC4xMzItMC45OTUsMC4wMTJjLTAuMDE4LDAuMDEyLTAuMDM2LDAuMDIzLTAuMDU0LDAuMDM2DQoJYy0wLjM3MiwwLjI0OS0wLjczNiwwLjI5NS0xLjA1OSwwLjIxNmMtMTEuNjA3LDIuMTM2LTIzLjQwMSwzLjcwNi0zNC42MzIsNy40NzZjLTAuMDcyLDAuMDI0LTAuMTQsMC4wMzQtMC4yMDgsMC4wNDgNCgljLTAuMTY0LDAuMTkxLTAuMzc5LDAuMzUzLTAuNjY3LDAuNDUyYy00LjEzOSwxLjQ0LTcuNzEyLDQuMTE4LTExLjYyMSw1Ljk5NWMtMC4yODksMC4xMzktMC41NywwLjE3Ni0wLjgzMywwLjE0OA0KCWMtMC4zNTMsMC4yNTctMC43LDAuNTIxLTEuMDUyLDAuNzY0Yy0wLjc5NiwwLjU0NS0xLjE3OCwxLjM5My0xLjkwOCwyLjAwNWMtMC42MDUsMC41MDctMS4zODQsMC45MDktMS45MDQsMS40OTUNCgljLTAuMzI0LDAuMzY1LTAuNzAxLDAuNTAyLTEuMDYzLDAuNDhjLTAuMTMxLDAuMjM3LTAuMzIxLDAuNDUzLTAuNTUzLDAuNjI5Yy0wLjU5NywwLjQ1My0xLjE2LDAuODY3LTEuNjgyLDEuNDA4DQoJYy0wLjUzNiwwLjU1Ny0xLjA0MiwxLjE1NS0xLjU5OCwxLjY5Yy0wLjI3MywwLjI2My0wLjU3NCwwLjM5LTAuODcyLDAuNDE4Yy00LjQ3LDUuNzMzLTkuNTA1LDExLjExLTEyLjEyMiwxOC4wMDUNCgljLTIuOSw3LjY0MS01LjA4OSwxNS4wOS01Ljk4NCwyMy4yNjhjLTAuMDYxLDAuNTU1LTAuMzYyLDAuOTQ0LTAuNzUsMS4xNzh2Ny45ODhoMzQuNzY4Yy0wLjAzLTAuMTI1LTAuMDUxLTAuMjU4LTAuMDQ5LTAuNDA2DQoJYzAuMDYzLTQuMTI1LDAuMTItOC4yNSwwLjEyNS0xMi4zNzVjMC0wLjI0NCwwLjA0OC0wLjQ1NiwwLjEzMi0wLjYzOWMtMC4xMDUtMC4yMDUtMC4xNjQtMC40NTEtMC4xNDItMC43NDgNCgljMC40NjgtNi40MTItMC4xMzctMTIuNzU2LTAuMDgzLTE5LjE2NmMwLjAzLTMuNTUzLDAuNDI1LTcuMDc2LDAuNzMzLTEwLjYwOGMtMC4yMTYtMC4xNzctMC4zNzYtMC40NDUtMC40My0wLjgyNg0KCWMtMC4zOC0yLjcxLTAuMjgxLTUuMzQ5LTAuMTc4LTguMDc2YzAuMDk5LTIuNjEtMC42NjgtNS4xNDItMC40NTktNy43MzljMC4wOTEtMS4xNCwxLjE4OC0xLjYwMSwyLjAzMS0xLjM4Ng0KCWMwLjEyLTAuMDI0LDAuMjQ2LTAuMDM4LDAuMzg2LTAuMDNjOC43MjQsMC4zOTQsMTcuMzMxLTAuMTUsMjYuMDg5LTAuMDI0YzguMDAzLDAuMTE0LDE1Ljk1NiwwLjMyNiwyMy45MTEsMC4yNzQNCgljMC4wNDEsMCwwLjA3NiwwLjAwOCwwLjExNiwwLjAxMWMzLjE4OCwwLjEwMiw2LjM1NiwwLjIwOCw5LjU1MSwwLjIwOGMxLjg4NSwwLDUuNjA3LDAuNjMyLDcuMzA2LTAuMjY0DQoJYzEuNjU2LTAuODc1LDMuMTIyLDEuNTI1LDEuNjU0LDIuNDk4YzAuMDQyLDAuMTI5LDAuMDczLDAuMjY4LDAuMDgyLDAuNDIyYzAuMTI0LDIuNTUzLTAuMTI1LDUuMTQ2LTAuMTI1LDcuNzA5DQoJYzAsMi4wOTEsMC40MzMsNC4xODYsMC4yMjQsNi4yNzFjLTAuMDUsMC40OTEtMC4wODMsMS4wMjEtMC4xNDYsMS41MzdjMC4yMjEsMC4zMSwwLjMzMiwwLjcwOSwwLjI0NCwxLjE3NQ0KCWMtMS4xNTgsNi4xNjIsMS4yMjcsMTIuNjUyLTAuMTY4LDE4LjcwOGMtMC4wMDQsMC4wMTctMC4wMTQsMC4wMjktMC4wMTksMC4wNDZjMC42ODEsMS40MjgsMC40MzEsMy4yMjEsMC4xODEsNC43NjgNCgljLTAuNTEzLDMuMTQ2LTAuMDg5LDYuMDg3LTAuMDMxLDkuMjA1YzAuMDE5LDAuMDY4LDAuMDM5LDAuMTM1LDAuMDQ5LDAuMjA5YzAuMjEsMS41ODgsMC40OTgsMy4xNDEsMC4zNzUsNC43NQ0KCWMtMC4xMDIsMS4zMjItMC40MDQsMi42MDQtMC40MzgsMy45MzhjLTAuMDA1LDAuMjEyLTAuMDUxLDAuMzk2LTAuMTIsMC41NjNoMzYuNzU0YzAuMTU1LTAuMzI4LDAuNDY1LTAuNTg0LDAuOTY5LTAuNjUzDQoJYzIuMTE5LTAuMjk2LDQuOTEtMS4wNTQsNi44MjgtMi4wMzZjMi4xOS0xLjEyMyw0Ljg5NC0xLjI1LDcuMjEzLTIuMTMxYzAuMTgxLTAuMDY4LDAuMzQ4LTAuMDk0LDAuNTA2LTAuMDk2DQoJYzAuMTEzLTAuMDg0LDAuMjQtMC4xNiwwLjM5MS0wLjIxN2M2LjA3OC0yLjI3NiwxMi42MTctMy4xODksMTguNjg4LTUuNDdjMC4xNzktMC4wNjUsMC4zNDItMC4wOSwwLjQ5OC0wLjA5NA0KCWMwLjE2Mi0wLjEyMSwwLjM2Ny0wLjIxMSwwLjYyNy0wLjI1YzMuNjE3LTAuNTQ0LDcuMTc3LTIuMTk2LDEwLjY2NC0zLjI5NWMwLjA0MS0wLjAxNywwLjA3NC0wLjAzNiwwLjExNy0wLjA1DQoJYzQuNDg2LTEuMzY1LDkuMDEtMi42MjUsMTMuNDg0LTMuOTY1YzIuMDY2LTAuNjE5LDQuMTU0LTEuOTI0LDYuMjY2LTIuMjU0YzEuODEyLTAuMjgzLDUuMTQ0LTAuMzM5LDYuNTI1LTEuNzcxDQoJYzAuMzkxLTAuNDA0LDAuODQ0LTAuNTA2LDEuMjYyLTAuNDIzQzIzOC4xODIsOTYuMjcsMjM3LjkyNSw4OS40OTMsMjM2LjMzNiw4Mi43MTF6Ii8+DQo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ig0KCU0yMi43ODEsMTI1LjgxM2gxNDEuMzEzIi8+DQo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ig0KCU05MS4yODEsNTQuNjg4YzAsMC02NS40MTctMC4wMjUtNjguNSw3MS4xMjUiLz4NCjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iDQoJTTE2NC4wOTQsMTI1LjgxM2w3NS4wNjEtMjIuNzIiLz4NCjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iDQoJTTkxLjI4MSw1NC42ODdjMCwwLDY3LjMzMy0zLjI5MSw3Mi44MTMsNzEuMTI1Ii8+DQo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ig0KCU0xNDkuOTA0LDQyLjY5NGMwLDAsNTguNjI4LTQuMDE3LDYyLjYyOCw2Ny42MTkiLz4NCjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgZD0iDQoJTTg4Ljc4MSw1NC43ODFsMTAzLjI0OS0yMC40NzdjMCwwLDQzLTIuNTAyLDQ3LjEyNSw2OC43ODkiLz4NCjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik01Ny42NjcsNjMuODUiLz4NCjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjU3LjY2NyIgeTE9IjYzLjk1MyIgeDI9IjEyOC41NjMiIHkyPSI2My45NTMiLz4NCjxwb2x5bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHBvaW50cz0iDQoJNTcuNjY3LDY0Ljc3OSA1Ny42NjcsMTI1LjgxMyA1Ny42NjcsNjQuMjUgIi8+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHgxPSIxMjguNTYzIiB5MT0iMTI1LjgxMyIgeDI9IjEyOC41NjMiIHkyPSI2My44NDgiLz4NCjxnPg0KCTxnPg0KCQkNCgkJCTxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgeDE9IjkzLjExNSIgeTE9IjYzLjk1MyIgeDI9IjkzLjExNSIgeTI9IjY3LjcwMyIvPg0KCQkNCgkJCTxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWRhc2hhcnJheT0iNi45NjkyLDMuMjUyMyIgeDE9IjkzLjExNSIgeTE9IjcwLjk1NiIgeDI9IjkzLjExNSIgeTI9IjEyMC40MzgiLz4NCgkJDQoJCQk8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHgxPSI5My4xMTUiIHkxPSIxMjIuMDYzIiB4Mj0iOTMuMTE1IiB5Mj0iMTI1LjgxMyIvPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNMTkuMDQsMTI5LjQ5N2wwLjkzLDguMDA5bDUuODU0LTguMDA5aDIuNDYydjAuMjcxYy0wLjUzNiwwLjAzNC0wLjg1MSwwLjA2OC0wLjk0NSwwLjEwNA0KCQkJYy0wLjE2NCwwLjA2My0wLjMxMywwLjE4OS0wLjQ1LDAuMzgyYy0wLjEzNywwLjE5LTAuMjg0LDAuNTU4LTAuNDQzLDEuMTAxbC0xLjg2Nyw2LjMwOGMtMC4xMDksMC4zNjYtMC4xNjQsMC42NTUtMC4xNjQsMC44NjQNCgkJCWMwLDAuMTksMC4wNjcsMC4zMzYsMC4yMDEsMC40MzRjMC4xODgsMC4xNDMsMC40ODYsMC4yMTMsMC44OTMsMC4yMTNoMC4xNzlsLTAuMDY3LDAuMjcxaC00LjI0OGwwLjA3NC0wLjI3MWgwLjIwMQ0KCQkJYzAuMzc3LDAsMC42NjUtMC4wNTQsMC44NjMtMC4xNjFjMC4xNTMtMC4wNzcsMC4yOTEtMC4yMjcsMC40MTMtMC40NDJjMC4xMjItMC4yMTksMC4yOTItMC43MDEsMC41MS0xLjQ0OWwxLjY2Ni01Ljc2Ng0KCQkJbC01Ljg4NCw4LjA5aC0wLjI5N2wtMC45NDUtOC4wOWwtMS44LDYuMTUzYy0wLjE1NCwwLjUyMy0wLjIzLDAuODc2LTAuMjMsMS4wNThjMCwwLjE4MSwwLjA2NywwLjMxNywwLjIwMSwwLjQxNA0KCQkJYzAuMTM0LDAuMDk2LDAuNDU5LDAuMTYsMC45NzUsMC4xOTNsLTAuMDgyLDAuMjcxaC0zLjMyNWwwLjA4Mi0wLjI3MWgwLjIwMWMwLjQ5MSwwLDAuODQ2LTAuMTIyLDEuMDY0LTAuMzY1DQoJCQljMC4xNTktMC4xNzgsMC4zMjUtMC41NTksMC40OTktMS4xNDZsMi4xOTQtNy40MTVjLTAuMTY0LTAuMTY2LTAuMzItMC4yNzgtMC40NjktMC4zMzdjLTAuMTQ5LTAuMDYtMC40MjQtMC4xMDQtMC44MjYtMC4xNA0KCQkJbDAuMDc0LTAuMjcxTDE5LjA0LDEyOS40OTdMMTkuMDQsMTI5LjQ5N3oiLz4NCgk8L2c+DQo8L2c+DQo8Zz4NCgk8Zz4NCgkJPHBhdGggZD0iTTU3LjgsMTI5LjI3bC0wLjc2LDguMjczYy0wLjA0LDAuMzg3LTAuMDU5LDAuNjQxLTAuMDU5LDAuNzY0YzAsMC4xOTQsMC4wMzcsMC4zNDQsMC4xMTEsMC40NDYNCgkJCWMwLjA5MywwLjE0MiwwLjIyLDAuMjQ3LDAuMzgsMC4zMTVjMC4xNiwwLjA2NywwLjQyOSwwLjEwMywwLjgwOCwwLjEwM2wtMC4wODEsMC4yNzFINTQuMjZsMC4wODEtMC4yNzFoMC4xNw0KCQkJYzAuMzE5LDAsMC41OC0wLjA2NywwLjc4Mi0wLjIwNWMwLjE0My0wLjA5MywwLjI1My0wLjI0NywwLjMzMi0wLjQ2MmMwLjA1NC0wLjE1LDAuMTA2LTAuNTA5LDAuMTU1LTEuMDdsMC4xMTgtMS4yNjNoLTIuODYyDQoJCQlsLTEuMDE4LDEuMzcyYy0wLjIzMSwwLjMwOS0wLjM3NiwwLjUyOS0wLjQzNiwwLjY2NGMtMC4wNTksMC4xMzQtMC4wODgsMC4yNi0wLjA4OCwwLjM3N2MwLDAuMTU3LDAuMDY0LDAuMjkxLDAuMTkyLDAuNDAyDQoJCQljMC4xMjgsMC4xMTMsMC4zMzksMC4xNzUsMC42MzQsMC4xODVsLTAuMDgxLDAuMjcxaC0yLjk1OGwwLjA4MS0wLjI3MWMwLjM2NC0wLjAxNSwwLjY4NS0wLjEzNiwwLjk2My0wLjM2Mg0KCQkJYzAuMjc4LTAuMjI4LDAuNjkyLTAuNzEzLDEuMjQzLTEuNDU1bDUuOTc2LTguMDg0SDU3Ljh6IE01Ni4zNCwxMzEuNzEybC0yLjg5OSwzLjkyNGgyLjUxNkw1Ni4zNCwxMzEuNzEyeiIvPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNOTQuMDg5LDEyOS4zM2MwLjY2LDAsMS4yNDMsMC4xNDMsMS43NTEsMC40MjdjMC41MDgsMC4yODQsMC45MDYsMC43MDQsMS4xOTQsMS4yNjFjMC4yODgsMC41NTgsMC40MzMsMS4xMzUsMC40MzMsMS43MzENCgkJCWMwLDEuMDYtMC4zMDksMi4xNzItMC45MjcsMy4zMzZzLTEuNDI1LDIuMDU0LTIuNDIxLDIuNjY1Yy0wLjk5NywwLjYxMS0yLjAyNywwLjkxOC0zLjA5MiwwLjkxOA0KCQkJYy0wLjc2NywwLTEuNDA4LTAuMTY5LTEuOTIzLTAuNTA2Yy0wLjUxNi0wLjMzOC0wLjg5Ni0wLjc4NC0xLjE0My0xLjMzOGMtMC4yNDctMC41NTUtMC4zNy0xLjA5Mi0wLjM3LTEuNjExDQoJCQljMC0wLjkyNCwwLjIyMy0xLjgzNywwLjY3LTIuNzM4YzAuNDQ3LTAuOSwwLjk4LTEuNjU0LDEuNjAxLTIuMjZjMC42Mi0wLjYwNSwxLjI4Mi0xLjA3LDEuOTg1LTEuMzk2DQoJCQlDOTIuNTUxLDEyOS40OTMsOTMuMjk4LDEyOS4zMyw5NC4wODksMTI5LjMzeiBNOTMuODQsMTI5Ljc5N2MtMC40ODgsMC0wLjk2NiwwLjEyLTEuNDMyLDAuMzYNCgkJCWMtMC40NjYsMC4yNDEtMC45MjksMC42MzUtMS4zODgsMS4xODJzLTAuODcyLDEuMjYzLTEuMjM4LDIuMTQ2Yy0wLjQ1LDEuMDktMC42NzQsMi4xMTctMC42NzQsMy4wODQNCgkJCWMwLDAuNjksMC4xNzgsMS4zMDMsMC41MzUsMS44MzRjMC4zNTYsMC41MzMsMC45MDMsMC44LDEuNjQxLDAuOGMwLjQ0NCwwLDAuODgtMC4xMDksMS4zMDgtMC4zMjgNCgkJCWMwLjQyOC0wLjIyLDAuODczLTAuNTk0LDEuMzM3LTEuMTIzYzAuNTgyLTAuNjY2LDEuMDctMS41MTcsMS40NjUtMi41NDhjMC4zOTYtMS4wMzMsMC41OTQtMS45OTcsMC41OTQtMi44OTMNCgkJCWMwLTAuNjYtMC4xNzktMS4yNDQtMC41MzUtMS43NTJDOTUuMDk3LDEzMC4wNSw5NC41NTgsMTI5Ljc5Nyw5My44NCwxMjkuNzk3eiIvPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNMTI1LjcxMywxMjkuNzdsMC4xMDQtMC4yNzFoMy41N2MwLjYsMCwxLjEzNSwwLjA5MywxLjYwNCwwLjI3N2MwLjQ3LDAuMTg4LDAuODIxLDAuNDQ1LDEuMDU2LDAuNzc3DQoJCQljMC4yMzIsMC4zMzMsMC4zNTIsMC42ODcsMC4zNTIsMS4wNTdjMCwwLjU3Mi0wLjIwOSwxLjA5LTAuNjI1LDEuNTUyYy0wLjQxNCwwLjQ2My0xLjA5MiwwLjgwNC0yLjAzMSwxLjAyMg0KCQkJYzAuNjA0LDAuMjI2LDEuMDUsMC41MjMsMS4zMzUsMC44OTZjMC4yODQsMC4zNzIsMC40MjgsMC43OCwwLjQyOCwxLjIyNmMwLDAuNDkzLTAuMTI4LDAuOTY1LTAuMzgzLDEuNDE1DQoJCQljLTAuMjU2LDAuNDUtMC41ODQsMC44LTAuOTg1LDEuMDVjLTAuNCwwLjI0OC0wLjg4NSwwLjQzMy0xLjQ0OSwwLjU0OWMtMC40MDMsMC4wODQtMS4wMzMsMC4xMjUtMS44OSwwLjEyNWgtMy42NjZsMC4wOTctMC4yNzENCgkJCWMwLjM4My0wLjAxLDAuNjQ1LTAuMDQ2LDAuNzgxLTAuMTFjMC4xOTYtMC4wODIsMC4zMzgtMC4xOTEsMC40Mi0wLjMzYzAuMTE4LTAuMTg2LDAuMjc1LTAuNjA5LDAuNDczLTEuMjc0bDEuNzkzLTYuMDIxDQoJCQljMC4xNTItMC41MSwwLjIyOS0wLjg2NSwwLjIyOS0xLjA3MWMwLTAuMTgxLTAuMDY3LTAuMzIzLTAuMjAyLTAuNDI5Yy0wLjEzNy0wLjEwNS0wLjM5NC0wLjE1OC0wLjc3MS0wLjE1OA0KCQkJQzEyNS44NjUsMTI5Ljc3NSwxMjUuNzg2LDEyOS43NzMsMTI1LjcxMywxMjkuNzd6IE0xMjUuNzU3LDEzOC43OTdjMC41MzEsMC4wNjgsMC45NDcsMC4xMDQsMS4yNDcsMC4xMDQNCgkJCWMwLjc2OCwwLDEuNDQ3LTAuMjI5LDIuMDQtMC42ODljMC41OTMtMC40NTksMC44OS0xLjA4MywwLjg5LTEuODdjMC0wLjYwMi0wLjE4NS0xLjA2OS0wLjU1MS0xLjQwNw0KCQkJYy0wLjM2NS0wLjMzOC0wLjk1OC0wLjUwNy0xLjc3My0wLjUwN2MtMC4xNTcsMC0wLjM1LDAuMDA3LTAuNTc1LDAuMDIxTDEyNS43NTcsMTM4Ljc5N3ogTTEyNy4yMSwxMzMuODk2DQoJCQljMC4zMTksMC4wMTEsMC41NTIsMC4wMTYsMC42OTQsMC4wMTZjMS4wMjEsMCwxLjc4My0wLjIyMSwyLjI4My0wLjY2M2MwLjQ5OC0wLjQ0MiwwLjc0OC0wLjk5NywwLjc0OC0xLjY2Mg0KCQkJYzAtMC41MDMtMC4xNTEtMC44OTYtMC40NTctMS4xNzdzLTAuNzkzLTAuNDIyLTEuNDYxLTAuNDIyYy0wLjE3OCwwLTAuNDA0LDAuMDI5LTAuNjgsMC4wODhMMTI3LjIxLDEzMy44OTZ6Ii8+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxwYXRoIGQ9Ik0xNjMuNjYsMTI5LjU1N2wzLjA1Miw3Ljc1bDEuNjUzLTUuNzg5YzAuMTM2LTAuNDc3LDAuMjAzLTAuODQ2LDAuMjAzLTEuMTA3YzAtMC4xOC0wLjA2My0wLjMyMS0wLjE4OS0wLjQyNA0KCQkJcy0wLjM2MS0wLjE1Mi0wLjcwNi0wLjE1MmMtMC4wNiwwLTAuMTE4LTAuMDAyLTAuMTgyLTAuMDA3bDAuMDc5LTAuMjcxaDMuMTc2bC0wLjA4NywwLjI3MWMtMC4zMy0wLjAwNS0wLjU3NSwwLjAyOC0wLjczNiwwLjEwMw0KCQkJYy0wLjIyOCwwLjEwMy0wLjM5NywwLjIzMi0wLjUxLDAuMzk0Yy0wLjE1NSwwLjIyOS0wLjMxMywwLjYyNy0wLjQ3NCwxLjE5NmwtMi4zMjIsOC4xNDloLTAuMjY0bC0zLjI4My04LjM0MWwtMS43NTYsNi4xNjENCgkJCWMtMC4xMzEsMC40NjctMC4xOTYsMC44MjMtMC4xOTYsMS4wNzFjMCwwLjE4NiwwLjA2LDAuMzI0LDAuMTc5LDAuNDJjMC4xMTgsMC4wOTUsMC40MDEsMC4xNTgsMC44NSwwLjE5MmwtMC4wNzMsMC4yNzFoLTMuMTAzDQoJCQlsMC4xMDItMC4yNzFjMC4zODktMC4wMSwwLjY0OC0wLjA0NCwwLjc3OS0wLjEwM2MwLjE5OS0wLjA4OCwwLjM0OC0wLjIwMSwwLjQ0My0wLjM0NGMwLjE0MS0wLjIxMywwLjI5OS0wLjYyNywwLjQ3NS0xLjIzOA0KCQkJbDEuOTU5LTYuODc1Yy0wLjE4OS0wLjI5My0wLjM5My0wLjQ5Mi0wLjYwOC0wLjYwM2MtMC4yMTYtMC4xMDgtMC41NTItMC4xNzItMS4wMDktMC4xODZsMC4wOC0wLjI3MWgyLjQ2OVYxMjkuNTU3eiIvPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNNjAuNTc0LDQ5LjE5MWwtMC43NCwzLjIwMUg1OS41N2wtMC4wMjktMC44MDJjLTAuMDI0LTAuMjkyLTAuMDgxLTAuNTUxLTAuMTY4LTAuNzhzLTAuMjItMC40MjctMC4zOTYtMC41OTQNCgkJCWMtMC4xNzYtMC4xNjgtMC4zOTgtMC4yOTktMC42NjctMC4zOTRjLTAuMjY5LTAuMDk1LTAuNTY2LTAuMTQyLTAuODk0LTAuMTQyYy0wLjg3NCwwLTEuNjM5LDAuMjM4LTIuMjkzLDAuNzE0DQoJCQljLTAuODM1LDAuNjA4LTEuNDksMS40NjYtMS45NjMsMi41NzRjLTAuMzkxLDAuOTE0LTAuNTg2LDEuODQtMC41ODYsMi43NzhjMCwwLjk1OCwwLjI4MSwxLjcyMiwwLjg0MiwyLjI5Mw0KCQkJYzAuNTYyLDAuNTcsMS4yOTIsMC44NTcsMi4xOSwwLjg1N2MwLjY3OSwwLDEuMjg0LTAuMTUxLDEuODEzLTAuNDUzYzAuNTI5LTAuMzAxLDEuMDIyLTAuNzY2LDEuNDc2LTEuMzkzaDAuMzQ1DQoJCQljLTAuNTM4LDAuODUxLTEuMTMzLDEuNDc3LTEuNzg4LDEuODc3Yy0wLjY1NSwwLjQwMS0xLjQzOSwwLjYwMy0yLjM1MiwwLjYwM2MtMC44MTEsMC0xLjUyOS0wLjE2OS0yLjE1NC0wLjUwNw0KCQkJcy0xLjEwMi0wLjgxMy0xLjQyOS0xLjQyNWMtMC4zMjctMC42MTItMC40OTEtMS4yNzEtMC40OTEtMS45NzZjMC0xLjA3OSwwLjI5MS0yLjEyOSwwLjg3Mi0zLjE0OXMxLjM3OC0xLjgyMywyLjM5Mi0yLjQwNg0KCQkJczIuMDM2LTAuODc1LDMuMDY2LTAuODc1YzAuNDg0LDAsMS4wMjYsMC4xMTQsMS42MjYsMC4zNDJjMC4yNjQsMC4wOTgsMC40NTUsMC4xNDYsMC41NzIsMC4xNDZjMC4xMTcsMCwwLjIyLTAuMDI0LDAuMzA4LTAuMDczDQoJCQljMC4wODgtMC4wNDksMC4yMzQtMC4xODcsMC40MzktMC40MTZINjAuNTc0eiIvPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNMTMyLjI5Miw0OS42M2wwLjA4OC0wLjI3MWgzLjE3M2MxLjM0NCwwLDIuMzM4LDAuMTU0LDIuOTg1LDAuNDYyYzAuNjQ3LDAuMzA4LDEuMTY0LDAuNzkzLDEuNTUsMS40NTYNCgkJCWMwLjM4NywwLjY2MywwLjU3OCwxLjM3MywwLjU3OCwyLjEzYzAsMC42NS0wLjEwOSwxLjI4My0wLjMzMywxLjg5NmMtMC4yMjQsMC42MTQtMC40NzQsMS4xMDUtMC43NTUsMS40NzQNCgkJCWMtMC4yOCwwLjM3LTAuNzEyLDAuNzc2LTEuMjkzLDEuMjIxYy0wLjU4MSwwLjQ0NS0xLjIxMSwwLjc3My0xLjg5MSwwLjk4NnMtMS41MjUsMC4zMi0yLjU0MywwLjMyaC00LjIwNWwwLjA5Ny0wLjI3MQ0KCQkJYzAuMzg2LTAuMDEsMC42NDYtMC4wNDQsMC43NzYtMC4xMDRjMC4xOTQtMC4wODIsMC4zMzgtMC4xOTUsMC40MzMtMC4zMzdjMC4xNDItMC4yMDYsMC4zLTAuNjE5LDAuNDc2LTEuMjM5bDEuNzYtNi4wMTQNCgkJCWMwLjEzNy0wLjQ3NSwwLjIwNS0wLjg0NiwwLjIwNS0xLjExNWMwLTAuMTktMC4wNjMtMC4zMzctMC4xOS0wLjQ0cy0wLjM3Ni0wLjE1NC0wLjc0OC0wLjE1NEwxMzIuMjkyLDQ5LjYzTDEzMi4yOTIsNDkuNjN6DQoJCQkgTTEzNC44OTUsNDkuOTA5bC0yLjE1NCw3LjQ0NGMtMC4xNjEsMC41NTctMC4yNDIsMC45MDItMC4yNDIsMS4wMzRjMCwwLjA3OSwwLjAyNSwwLjE1NCwwLjA3NywwLjIyOA0KCQkJYzAuMDUyLDAuMDcyLDAuMTIsMC4xMjEsMC4yMDksMC4xNDZjMC4xMjcsMC4wNDQsMC4zMzIsMC4wNjYsMC42MTQsMC4wNjZjMC43NjgsMCwxLjQ3OS0wLjA4LDIuMTM3LTAuMjM5DQoJCQljMC42NTYtMC4xNTksMS4xOTUtMC4zOTUsMS42MTUtMC43MDhjMC41OTctMC40NTUsMS4wNzItMS4wODEsMS40MjktMS44NzdzMC41MzQtMS43MDQsMC41MzQtMi43MjENCgkJCWMwLTEuMTQ5LTAuMjcyLTIuMDAzLTAuODE5LTIuNTYzYy0wLjU0Ny0wLjU2LTEuMzQ3LTAuODQtMi4zOTYtMC44NEMxMzUuNjM5LDQ5Ljg3OSwxMzUuMzA1LDQ5Ljg4OSwxMzQuODk1LDQ5LjkwOXoiLz4NCgk8L2c+DQo8L2c+DQo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIGQ9Ig0KCU0xMS41MzEsMTQ3LjA2MyIvPg0KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBkPSINCglNMjQzLjUzMSwzMS4wNjMiLz4NCjxnPg0KCTxnPg0KCQk8cGF0aCBkPSJNMjM1LjE4MiwxMDcuNDUxaDMuOTRjMS4wMzIsMCwxLjgwNSwwLjIyMiwyLjMxNiwwLjY2NHMwLjc2OCwwLjk4MSwwLjc2OCwxLjYxN2MwLDAuNTA0LTAuMTYzLDAuOTkyLTAuNDg3LDEuNDY3DQoJCQlzLTAuODA3LDAuODU5LTEuNDQ2LDEuMTU1cy0xLjMzLDAuNDQzLTIuMDczLDAuNDQzYy0wLjQ2MiwwLTEuMDUtMC4wODMtMS43NjMtMC4yNDlsLTAuNzk3LDIuNzE0DQoJCQljLTAuMTg4LDAuNjQ2LTAuMjgsMS4wNy0wLjI4LDEuMjc2YzAsMC4xNTYsMC4wNjYsMC4yODUsMC4xOTksMC4zODljMC4xMzMsMC4xMDMsMC40NSwwLjE2OCwwLjk1MSwwLjE5N2wtMC4wNzMsMC4yNzFoLTMuOTc3DQoJCQlsMC4wODEtMC4yNzFjMC41MjEsMCwwLjg4NC0wLjA4OSwxLjA4OC0wLjI2OGMwLjIwNC0wLjE3OCwwLjQyNS0wLjY3MSwwLjY2LTEuNDc4bDEuNjUzLTUuNjYyDQoJCQljMC4xOTYtMC42OCwwLjI5NS0xLjEzNSwwLjI5NS0xLjM2NGMwLTAuMTcxLTAuMDctMC4zMTMtMC4yMS0wLjQyNmMtMC4xNDEtMC4xMTItMC40NDktMC4xODEtMC45MjctMC4yMDVMMjM1LjE4MiwxMDcuNDUxeg0KCQkJIE0yMzYuNTYyLDExMi4wODdjMC41NTYsMC4xNDIsMS4wMDQsMC4yMTMsMS4zNDMsMC4yMTNjMC41MzYsMCwxLjAyNC0wLjExLDEuNDY1LTAuMzNjMC40MzktMC4yMjEsMC43ODQtMC41NTEsMS4wMzItMC45OQ0KCQkJYzAuMjQ5LTAuNDQsMC4zNzMtMC44OTcsMC4zNzMtMS4zNzJjMC0wLjQ5My0wLjE1Mi0wLjg4NS0wLjQ1Ny0xLjE3M2MtMC4zMDYtMC4yODktMC43NjgtMC40MzMtMS4zODgtMC40MzMNCgkJCWMtMC4zMzQsMC0wLjc0LDAuMDQxLTEuMjE3LDAuMTI0TDIzNi41NjIsMTEyLjA4N3oiLz4NCgk8L2c+DQo8L2c+DQo8L3N2Zz4NCgo=" alt="" style="max-width:100%;height:auto;display:block;margin:10px auto;"><p>Алексей Юрьевич решил построить на дачном участке теплицу длиной <i>NP</i>&#8239;&#8239;=&#8239;&#8239;4,5&#8239;м. Для этого он сделал прямоугольный фундамент. Для каркаса теплицы Алексей Юрьевич заказывает металлические дуги в форме полуокружностей длиной 5,2&#8239;м каждая и пленку для обтяжки. В передней стенке планируется вход, показанный на рисунке прямоугольником <i>ACDB</i>. Точки <i>A</i> и <i>B</i>&#8239;&#8239;— середины отрезков <i>MO</i> и <i>ON</i> соответственно.</div>
+<form id="testForm" onsubmit="return false;">
+<div class="sheet-card">
+<div class="task">
+  <div class="task-num">1</div>
+  <div class="task-q"><p>Какое наименьшее количество дуг нужно заказать, чтобы расстояние между соседними дугами было не более 60&#8239;см?</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_1" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_1"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">2</div>
+  <div class="task-q"><p>Найдите примерную ширину <i>MN</i> теплицы в метрах. Число &pi; возьмите равным 3,14. Результат округлите до десятых.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_2" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_2"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">3</div>
+  <div class="task-q"><p>Найдите примерную площадь участка внутри теплицы в квадратных метрах. Ответ округлите до целых.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_3" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_3"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">4</div>
+  <div class="task-q"><p>Сколько квадратных метров пленки нужно купить для теплицы с учетом передней и задней стенок, включая дверь? Для крепежа пленку нужно покупать с запасом 10 %. Число &pi; возьмите равным 3,14. Ответ округлите до целых.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_4" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_4"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">5</div>
+  <div class="task-q"><p>Найдите примерную высоту входа в теплицу в метрах. Число &pi; возьмите равным 3,14. Ответ округлите до десятых.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_5" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_5"></span>
+  </div>
+</div>
+</div>
+</form>
+<div id="controls">
+  <button onclick="checkAll()">Проверить ответы</button>
+  <button class="secondary" onclick="copyResults()">Скопировать результат</button>
+  <span id="score"></span>
+  <span id="copyStatus"></span>
+</div>
+<footer class="brand">Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова</footer>
+</div>
+<script>
+const SEED = 404763717;
+const HASHES = {"1": [4622293070609707], "2": [5024042989161952], "3": [2767102985662660], "4": [3877681038165531], "5": [7518647085017414]};
+function cyrb53(str, seed) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+const SUP = {"⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9"};
+const CYR = {"а":"a","в":"b","с":"c","х":"x","у":"y","р":"p","о":"o","е":"e","к":"k","м":"m","т":"t"};
+function norm(raw) {
+  let s = (raw || "").toString().toLowerCase();
+  s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, t => "^" + [...t].map(c => SUP[c]).join(""));
+  s = s.replace(/[авсхуроекмт]/g, c => CYR[c]);
+  s = s.replace(/[−–—]/g, "-").replace(/,/g, ".").replace(/[\s*·⋅×°]/g, "");
+  return s;
+}
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+function parseRat(s) {
+  const m = s.match(/^([+-]?)(\d+)(?:\.(\d+))?(?:\/(\d+)(?:\.(\d+))?)?$/);
+  if (!m) return null;
+  const dec = m[3] || "";
+  let n = parseInt(m[2] + dec, 10), d = Math.pow(10, dec.length);
+  if (m[4] !== undefined) {
+    const dec2 = m[5] || "";
+    const n2 = parseInt(m[4] + dec2, 10), d2 = Math.pow(10, dec2.length);
+    if (n2 === 0) return null;
+    n = n * d2; d = d * n2;
+  }
+  if (m[1] === "-") n = -n;
+  const g = gcd(n, d);
+  return [n / g, d / g];
+}
+function parseMonoObj(s) {
+  const m = s.match(/^([+-]?)(?:\(([^)]*)\)|(\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?))?((?:[a-z](?:\^\d+)?)*)$/);
+  if (!m) return null;
+  const coefStr = m[2] !== undefined ? m[2] : m[3];
+  if (!coefStr && !m[4]) return null;
+  let coef = coefStr ? parseRat(coefStr) : [1, 1];
+  if (!coef) return null;
+  if (m[1] === "-") coef = [-coef[0], coef[1]];
+  const vars = {};
+  for (const t of m[4].matchAll(/([a-z])(?:\^(\d+))?/g)) {
+    vars[t[1]] = (vars[t[1]] || 0) + (t[2] ? parseInt(t[2], 10) : 1);
+  }
+  const letters = Object.keys(vars).sort().filter(k => vars[k]).map(k => k + "^" + vars[k]).join("");
+  return { coef, letters };
+}
+function parseMono(s) {
+  const o = parseMonoObj(s);
+  return o ? "m:" + o.coef[0] + "/" + o.coef[1] + "|" + o.letters : null;
+}
+// Многочлен стандартного вида: подобные слагаемые должны быть уже приведены.
+function parsePoly(s) {
+  const terms = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if ((ch === "+" || ch === "-") && depth === 0 && i > start) { terms.push(s.slice(start, i)); start = i; }
+  }
+  terms.push(s.slice(start));
+  const acc = {};
+  for (const t of terms) {
+    const o = parseMonoObj(t);
+    if (!o || o.coef[0] === 0 || o.letters in acc) return null;
+    acc[o.letters] = o.coef;
+  }
+  return "p:" + Object.keys(acc).sort().map(k => acc[k][0] + "/" + acc[k][1] + "|" + k).join(";");
+}
+function candidates(raw) {
+  const s = norm(raw);
+  const out = ["s:" + s];
+  const r = parseRat(s.replace(/^\((.*)\)$/, "$1"));
+  if (r) out.push("n:" + r[0] + "/" + r[1]);
+  const mono = parseMono(s);
+  if (mono) out.push(mono);
+  const poly = parsePoly(s);
+  if (poly) out.push(poly);
+  return out;
+}
+function isCorrect(taskNo, raw) {
+  if (!raw.trim()) return false;
+  const good = HASHES[taskNo];
+  return candidates(raw).some(c => good.includes(cyrb53(taskNo + ":" + c, SEED)));
+}
+// Две попытки: после второй проверки ответы блокируются. Число попыток
+// запоминается в браузере, чтобы перезагрузка страницы их не сбрасывала.
+const MAX_ATTEMPTS = 2;
+const STORE_KEY = "attempts:" + location.pathname + ":" + SEED;
+let state = { attempts: 0, answers: {} };
+let lastResults = null;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { return null; } }
+function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+function inputOf(taskNo) { return document.getElementById("input_" + taskNo); }
+function checkButton() { return document.querySelector('button[onclick^="checkAll"]'); }
+function setStatus(text) { document.getElementById("copyStatus").textContent = text; }
+function computeResults() {
+  let correctCount = 0;
+  const rows = [];
+  for (const taskNo in HASHES) {
+    const value = inputOf(taskNo).value;
+    const ok = isCorrect(taskNo, value);
+    if (ok) correctCount++;
+    rows.push({ taskNo, isCorrect: ok, userAnswer: value.trim() });
+  }
+  return { correctCount, total: Object.keys(HASHES).length, rows };
+}
+function attemptsNote() {
+  const left = MAX_ATTEMPTS - state.attempts;
+  return left > 0 ? " · осталась " + left + " попытка" : " · попытки закончились";
+}
+function showResults() {
+  const { correctCount, total, rows } = lastResults;
+  for (const row of rows) {
+    const verdict = document.getElementById("verdict_" + row.taskNo);
+    if (row.isCorrect) {
+      verdict.textContent = "Верно";
+      verdict.className = "verdict correct";
+    } else {
+      verdict.textContent = row.userAnswer ? "Неверно" : "Нет ответа";
+      verdict.className = "verdict wrong";
+    }
+  }
+  document.getElementById("score").textContent = "Результат: " + correctCount + " из " + total + attemptsNote();
+}
+function lockIfDone() {
+  if (state.attempts < MAX_ATTEMPTS) return;
+  for (const taskNo in HASHES) inputOf(taskNo).disabled = true;
+  const btn = checkButton();
+  if (btn) { btn.disabled = true; btn.textContent = "Попытки закончились"; btn.style.opacity = "0.55"; btn.style.cursor = "default"; }
+}
+function checkAll() {
+  if (state.attempts >= MAX_ATTEMPTS) return;
+  const answers = {};
+  let filled = 0;
+  for (const taskNo in HASHES) {
+    answers[taskNo] = inputOf(taskNo).value;
+    if (answers[taskNo].trim()) filled++;
+  }
+  if (filled === 0) { setStatus("Сначала решите задания и впишите ответы — попытка не потрачена."); return; }
+  if (state.attempts === MAX_ATTEMPTS - 1 &&
+      !confirm("Это последняя попытка. После проверки ответы нельзя будет изменить. Проверить?")) return;
+  state.attempts++;
+  state.answers = answers;
+  saveState();
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+  setStatus(state.attempts < MAX_ATTEMPTS ? "Исправьте ошибки и проверьте ещё раз." : "");
+}
+function copyResults() {
+  if (!lastResults) { setStatus("Сначала нажмите «Проверить ответы»."); return; }
+  const { correctCount, total, rows } = lastResults;
+  const lines = [document.title + " — результат: " + correctCount + " из " + total +
+                 " (попытка " + state.attempts + " из " + MAX_ATTEMPTS + ")", ""];
+  for (const row of rows) {
+    if (row.isCorrect) lines.push("✅ №" + row.taskNo + " (" + row.userAnswer + ")");
+    else lines.push("❌ №" + row.taskNo + " (мой ответ: " + (row.userAnswer || "—") + ")");
+  }
+  const ta = document.createElement("textarea");
+  ta.value = lines.join("\n");
+  ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  setStatus(ok ? "Скопировано! Отправьте учителю." : "Не удалось скопировать автоматически — выделите текст вручную.");
+}
+(function restore() {
+  const saved = loadState();
+  if (!saved || !saved.attempts) return;
+  state = saved;
+  for (const taskNo in HASHES) if (state.answers[taskNo] !== undefined) inputOf(taskNo).value = state.answers[taskNo];
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+})();
+</script>
+</body>
+</html>
