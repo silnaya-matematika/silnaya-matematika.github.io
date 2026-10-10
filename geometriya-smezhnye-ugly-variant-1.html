@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Смежные углы, геометрия</title>
+<style>
+  :root {
+    --bg: #f5f1fb;
+    --surface: #ffffff;
+    --surface-2: #ece2f9;
+    --ink: #2e2558;
+    --muted: #7c749a;
+    --hairline: #ddceef;
+    --accent: #6a4fc4;
+    --accent-soft: #ece2f9;
+    --correct: #2f8f5b;
+    --wrong: #c0392b;
+    --serif: Georgia, "PT Serif", "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    font-family: var(--serif);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 20px 60px;
+    color: var(--ink);
+    background: var(--bg);
+    position: relative;
+  }
+  .doodle { position: absolute; opacity: 0.5; pointer-events: none; z-index: 0; color: var(--accent); }
+  .doodle-text { font-family: var(--serif); font-weight: 700; font-style: italic; }
+  .doodle-sun   { top: 1%;  left: -64px; }
+  .doodle-bow   { top: 1%;  right: -66px; }
+  .doodle-sqrt  { top: 12%; right: -58px; font-size: 1.7rem; transform: rotate(6deg); }
+  .doodle-heart { top: 16%; left: -54px; }
+  .doodle-x2    { top: 27%; right: -50px; font-size: 1.6rem; transform: rotate(-7deg); }
+  .doodle-dots  { top: 34%; left: -48px; }
+  .doodle-flower{ top: 44%; right: -56px; }
+  .doodle-frac  { top: 52%; left: -50px; font-size: 1.5rem; transform: rotate(5deg); }
+  .doodle-pencil{ top: 63%; right: -60px; }
+  .doodle-star2 { top: 70%; left: -50px; }
+  .doodle-notebook { top: 80%; right: -56px; }
+  .doodle-shell { bottom: 0%; left: -45px; }
+  .doodle-star  { bottom: 1%; right: -48px; }
+  @media (max-width: 1040px) { .doodle { display: none; } }
+
+  .sheet { position: relative; z-index: 1; }
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .variant-badge {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 24px;
+    background: var(--surface-2);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 8px 22px;
+    border-radius: 999px;
+  }
+
+  #controls {
+    background: var(--bg);
+    padding: 12px 0;
+    margin: 24px 0 0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+  }
+  button {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 18px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #5a41ae; }
+  button.secondary { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
+  button.secondary:hover { background: var(--accent-soft); }
+  #score { font-weight: 700; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  #copyStatus { color: var(--correct); font-size: 0.9rem; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+
+  .sheet-card {
+    background: var(--surface);
+    border: 1.5px solid var(--hairline);
+    border-radius: 18px;
+    padding: 8px 26px 4px;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 6px 14px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--hairline);
+  }
+  .task:last-child { border-bottom: none; }
+  .task-num {
+    width: 38px; height: 38px;
+    background: var(--surface-2);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem;
+  }
+  .task-q { padding-top: 5px; line-height: 1.6; }
+  .task-q img { display: inline-block; vertical-align: middle; max-width: 100%; }
+  .answer-row { grid-column: 2; margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  input.ans {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    padding: 8px 10px; font-size: 1rem; border: 1px solid var(--hairline);
+    border-radius: 6px; width: 160px; background: #fff; color: var(--ink);
+  }
+  .verdict { font-weight: 600; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .verdict.correct { color: var(--correct); }
+  .verdict.wrong { color: var(--wrong); }
+
+  footer.brand {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1.5px dashed var(--hairline);
+    text-align: center;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+  }
+
+  .expr { font-size: 1.15rem; white-space: nowrap; display: inline-block; margin: 6px 0 0; }
+  .expr i { font-style: italic; }
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.85em; line-height: 1.1; margin: 0 2px; }
+  .frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 2px; }
+  .hint { text-align: center; color: var(--muted); font-size: 0.9rem; margin: -8px 0 18px; font-family: -apple-system, Segoe UI, Arial, sans-serif; line-height: 1.5; }
+  input.ans { width: 220px; }
+  .task-q { overflow-x: auto; }
+
+  .fig { margin: 10px 0 2px; }
+  .fig svg { display: block; max-width: 100%; height: auto; }
+  .opts { margin: 8px 0 4px; line-height: 1.55; }
+  .note { color: var(--muted); font-size: 0.88rem; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .expr { white-space: normal; }
+</style>
+</head>
+<body>
+<svg class="doodle doodle-sun" width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="23" cy="23" r="9"/><path d="M23 2v7M23 37v7M2 23h7M37 23h7M8 8l5 5M33 33l5 5M38 8l-5 5M13 33l-5 5"/></svg>
+<svg class="doodle doodle-bow" width="50" height="42" viewBox="0 0 50 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M25 18c-6-10-22-10-22 0 0 8 14 8 22 14 8-6 22-6 22-14 0-10-16-10-22 0Z"/><path d="M25 18v22"/></svg>
+<svg class="doodle doodle-shell" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 6c9 3 15 11 15 21H6c0-10 6-18 15-21Z"/><path d="M21 8v19M14 12l3 15M28 12l-3 15"/></svg>
+<svg class="doodle doodle-star" width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<span class="doodle doodle-text doodle-sqrt">&radic;a</span>
+<svg class="doodle doodle-heart" width="36" height="32" viewBox="0 0 36 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 29C7 21 2 15 2 9.5 2 4.8 5.6 2 9.6 2c3 0 5.8 1.8 8.4 6 2.6-4.2 5.4-6 8.4-6 4 0 7.6 2.8 7.6 7.5 0 5.5-5 11.5-16 19.5Z"/></svg>
+<span class="doodle doodle-text doodle-x2">x&sup2;</span>
+<svg class="doodle doodle-dots" width="34" height="34" viewBox="0 0 34 34" fill="currentColor"><circle cx="4" cy="6" r="2.2"/><circle cx="16" cy="4" r="2.2"/><circle cx="28" cy="9" r="2.2"/><circle cx="8" cy="18" r="2.2"/><circle cx="22" cy="20" r="2.2"/><circle cx="14" cy="30" r="2.2"/></svg>
+<svg class="doodle doodle-flower" width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="3.4"/><ellipse cx="19" cy="8" rx="4.4" ry="6.5"/><ellipse cx="19" cy="30" rx="4.4" ry="6.5"/><ellipse cx="8" cy="19" rx="6.5" ry="4.4"/><ellipse cx="30" cy="19" rx="6.5" ry="4.4"/></svg>
+<span class="doodle doodle-text doodle-frac">a&frasl;b</span>
+<svg class="doodle doodle-pencil" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 35l1.5-8L28 7.5l6.5 6.5L15 34.5 7 36Z"/><path d="M25.5 10.5l6.5 6.5M8.5 27l6.5 6.5"/></svg>
+<svg class="doodle doodle-star2" width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<svg class="doodle doodle-notebook" width="34" height="40" viewBox="0 0 34 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="26" height="36" rx="2.5"/><path d="M10 12h14M10 19h14M10 26h9"/></svg>
+
+<div class="sheet"><noscript><div style="background:#fdecea;color:#8a1c12;border:1px solid #f5c2bc;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-family:-apple-system,Arial,sans-serif;">Проверка ответов здесь не работает. Откройте тест по ссылке в браузере (Safari или Chrome).</div></noscript>
+<h1>Геометрия: смежные углы</h1>
+<div class="variant-badge">Вариант 1</div>
+<div class="hint">В заданиях 1–2 впишите номер верного ответа. В остальных ответ — число градусов (или значение <i>x</i>), знак ° писать не нужно.</div>
+<form id="testForm" onsubmit="return false;">
+<div class="sheet-card">
+<div class="task">
+  <div class="task-num">1</div>
+  <div class="task-q">Какое из утверждений верно определяет <b>смежные углы</b>?<div class='opts'><b>1.</b> Два угла называются смежными, если их сумма равна 90°.<br><b>2.</b> Два угла называются смежными, если они равны и имеют общую вершину.<br><b>3.</b> Два угла называются смежными, если у них общая вершина и одна общая сторона.<br><b>4.</b> Два угла называются смежными, если у них одна сторона общая, а две другие стороны являются дополнительными лучами.</div><br><span class='note'>Впишите номер верного ответа.</span></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_1" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_1"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">2</div>
+  <div class="task-q">Какое из утверждений верно выражает <b>свойство смежных углов</b>?<div class='opts'><b>1.</b> Смежные углы всегда равны между собой.<br><b>2.</b> Сумма смежных углов равна 360°.<br><b>3.</b> Сумма смежных углов равна 180°.<br><b>4.</b> Один из смежных углов всегда острый, а другой тупой.</div><br><span class='note'>Впишите номер верного ответа.</span></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_2" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_2"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">3</div>
+  <div class="task-q">Точки P, O, Q лежат на одной прямой. Найдите &#8736;ROQ (в градусах).<div class="fig"><svg viewBox="0 0 320 172" width="320" role="img" aria-label="Чертёж к задаче"><line x1="20" y1="140" x2="300" y2="140" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><circle cx="160" cy="140" r="2.6" fill="#2e2558"/><text x="20.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">P</text><text x="300.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">Q</text><text x="160.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">O</text><line x1="160" y1="140" x2="131.9" y2="27.4" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="129.3" y="16.8" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">R</text><path d="M 149.8 99.2 A 42 42 0 0 0 118.0 140.0" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="113.5" y="103.7" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">76&#176;</text><path d="M 202.0 140.0 A 42 42 0 0 0 149.8 99.2" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/><text x="198.2" y="91.1" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:17px;fill:#c0392b;font-weight:700;">?</text></svg></div></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_3" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_3"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">4</div>
+  <div class="task-q">Точки M, O, N лежат на одной прямой. Найдите &#8736;MOK (в градусах).<div class="fig"><svg viewBox="0 0 320 172" width="320" role="img" aria-label="Чертёж к задаче"><line x1="20" y1="140" x2="300" y2="140" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><circle cx="160" cy="140" r="2.6" fill="#2e2558"/><text x="20.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">M</text><text x="300.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">N</text><text x="160.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">O</text><line x1="160" y1="140" x2="188.1" y2="27.4" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="190.7" y="16.8" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">K</text><path d="M 169.2 103.1 A 38 38 0 0 0 122.0 140.0" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="116.9" y="84.8" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">(4x+36)&#176;</text><path d="M 198.0 140.0 A 38 38 0 0 0 169.2 103.1" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="215.2" y="96.9" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">(4x+8)&#176;</text></svg></div></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_4" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_4"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">5</div>
+  <div class="task-q">Точки M, O, N лежат на одной прямой. Найдите &#8736;KOP (в градусах).<div class="fig"><svg viewBox="0 0 320 172" width="320" role="img" aria-label="Чертёж к задаче"><line x1="20" y1="140" x2="300" y2="140" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><circle cx="160" cy="140" r="2.6" fill="#2e2558"/><text x="20.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">M</text><text x="300.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">N</text><text x="160.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">O</text><line x1="160" y1="140" x2="122.2" y2="30.3" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="118.7" y="19.9" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">K</text><line x1="160" y1="140" x2="233.0" y2="49.9" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="239.9" y="41.3" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">P</text><path d="M 147.0 102.2 A 40 40 0 0 0 120.0 140.0" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="112.8" y="106.3" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">71&#176;</text><path d="M 200.0 140.0 A 40 40 0 0 0 185.2 108.9" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="212.3" y="115.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">51&#176;</text><path d="M 185.2 108.9 A 40 40 0 0 0 147.0 102.2" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/><text x="170.1" y="82.9" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:17px;fill:#c0392b;font-weight:700;">?</text></svg></div></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_5" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_5"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">6</div>
+  <div class="task-q">Точки D, O, E лежат на одной прямой, луч OG — биссектриса угла DOF. Найдите &#8736;GOE (в градусах).<div class="fig"><svg viewBox="0 0 320 172" width="320" role="img" aria-label="Чертёж к задаче"><line x1="20" y1="140" x2="300" y2="140" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><circle cx="160" cy="140" r="2.6" fill="#2e2558"/><text x="20.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">D</text><text x="300.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">E</text><text x="160.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">O</text><line x1="160" y1="140" x2="234.6" y2="51.1" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="241.6" y="42.7" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">F</text><line x1="160" y1="140" x2="111.0" y2="34.9" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="106.3" y="24.9" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">G</text><path d="M 144.8 107.4 A 36 36 0 0 0 124.0 140.0" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><path d="M 183.1 112.4 A 36 36 0 0 0 144.8 107.4" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><line x1="133.9" y1="123.3" x2="125.4" y2="118.0" stroke="#6a4fc4" stroke-width="2"/><line x1="164.0" y1="109.3" x2="165.4" y2="99.4" stroke="#6a4fc4" stroke-width="2"/><path d="M 205.0 86.4 A 70 70 0 0 0 90.0 140.0" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="85.8" y="92.7" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">130&#176;</text><path d="M 256.0 140.0 A 96 96 0 0 0 119.4 53.0" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/><text x="219.6" y="46.4" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:17px;fill:#c0392b;font-weight:700;">?</text></svg></div></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_6" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_6"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">7</div>
+  <div class="task-q">Один из смежных углов на 80° больше другого. Найдите меньший из этих углов (в градусах).</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_7" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_7"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">8</div>
+  <div class="task-q">Смежные углы относятся как 7 : 8. Найдите больший из них (в градусах).</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_8" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_8"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">9</div>
+  <div class="task-q">Углы 1 и 2 — смежные с одним и тем же углом, равным 72°. Найдите сумму углов 1 и 2 (в градусах).</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_9" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_9"></span>
+  </div>
+</div>
+<div class="task">
+  <div class="task-num">10</div>
+  <div class="task-q">Точки P, O, Q лежат на одной прямой, OR &#8869; PQ. Найдите &#8736;POS (в градусах).<div class="fig"><svg viewBox="0 0 320 172" width="320" role="img" aria-label="Чертёж к задаче"><line x1="20" y1="140" x2="300" y2="140" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><circle cx="160" cy="140" r="2.6" fill="#2e2558"/><text x="20.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">P</text><text x="300.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">Q</text><text x="160.0" y="157.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">O</text><line x1="160" y1="140" x2="160.0" y2="24.0" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="160.0" y="13.0" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">R</text><line x1="160" y1="140" x2="265.1" y2="91.0" stroke="#2e2558" stroke-width="1.8" stroke-linecap="round"/><text x="275.1" y="86.3" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:15px;fill:#2e2558;font-style:italic;">S</text><path d="M 160.0 125.0 L 145.0 125.0 L 145.0 140.0" fill="none" stroke="#6a4fc4" stroke-width="1.8"/><path d="M 199.9 121.4 A 44 44 0 0 0 160.0 96.0" fill="none" stroke="#6a4fc4" stroke-width="1.8" stroke-linecap="round"/><text x="193.8" y="86.9" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:14px;fill:#2e2558;font-style:italic;">65&#176;</text><path d="M 236.1 104.5 A 84 84 0 0 0 76.0 140.0" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/><text x="138.4" y="42.4" text-anchor="middle" dominant-baseline="central" style="font-family:Georgia, 'PT Serif', 'Times New Roman', serif;font-size:17px;fill:#c0392b;font-weight:700;">?</text></svg></div></div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_10" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_10"></span>
+  </div>
+</div>
+</div>
+</form>
+<div id="controls">
+  <button onclick="checkAll()">Проверить ответы</button>
+  <button class="secondary" onclick="copyResults()">Скопировать результат</button>
+  <span id="score"></span>
+  <span id="copyStatus"></span>
+</div>
+<footer class="brand">Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова</footer>
+</div>
+<script>
+const SEED = 1091486340;
+const HASHES = {"1": [2833192531870034], "2": [3323997058051197], "3": [6300652287996657], "4": [4351406536414768], "5": [2095317434532850], "6": [3190445316783725], "7": [707808857464095], "8": [2891696089280198], "9": [5242960769611620], "10": [8396035590056231]};
+function cyrb53(str, seed) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+const SUP = {"⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9"};
+const CYR = {"а":"a","в":"b","с":"c","х":"x","у":"y","р":"p","о":"o","е":"e","к":"k","м":"m","т":"t"};
+function norm(raw) {
+  let s = (raw || "").toString().toLowerCase();
+  s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, t => "^" + [...t].map(c => SUP[c]).join(""));
+  s = s.replace(/[авсхуроекмт]/g, c => CYR[c]);
+  s = s.replace(/[−–—]/g, "-").replace(/,/g, ".").replace(/[\s*·⋅×°]/g, "");
+  return s;
+}
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+function parseRat(s) {
+  const m = s.match(/^([+-]?)(\d+)(?:\.(\d+))?(?:\/(\d+)(?:\.(\d+))?)?$/);
+  if (!m) return null;
+  const dec = m[3] || "";
+  let n = parseInt(m[2] + dec, 10), d = Math.pow(10, dec.length);
+  if (m[4] !== undefined) {
+    const dec2 = m[5] || "";
+    const n2 = parseInt(m[4] + dec2, 10), d2 = Math.pow(10, dec2.length);
+    if (n2 === 0) return null;
+    n = n * d2; d = d * n2;
+  }
+  if (m[1] === "-") n = -n;
+  const g = gcd(n, d);
+  return [n / g, d / g];
+}
+function parseMonoObj(s) {
+  const m = s.match(/^([+-]?)(?:\(([^)]*)\)|(\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?))?((?:[a-z](?:\^\d+)?)*)$/);
+  if (!m) return null;
+  const coefStr = m[2] !== undefined ? m[2] : m[3];
+  if (!coefStr && !m[4]) return null;
+  let coef = coefStr ? parseRat(coefStr) : [1, 1];
+  if (!coef) return null;
+  if (m[1] === "-") coef = [-coef[0], coef[1]];
+  const vars = {};
+  for (const t of m[4].matchAll(/([a-z])(?:\^(\d+))?/g)) {
+    vars[t[1]] = (vars[t[1]] || 0) + (t[2] ? parseInt(t[2], 10) : 1);
+  }
+  const letters = Object.keys(vars).sort().filter(k => vars[k]).map(k => k + "^" + vars[k]).join("");
+  return { coef, letters };
+}
+function parseMono(s) {
+  const o = parseMonoObj(s);
+  return o ? "m:" + o.coef[0] + "/" + o.coef[1] + "|" + o.letters : null;
+}
+// Многочлен стандартного вида: подобные слагаемые должны быть уже приведены.
+function parsePoly(s) {
+  const terms = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if ((ch === "+" || ch === "-") && depth === 0 && i > start) { terms.push(s.slice(start, i)); start = i; }
+  }
+  terms.push(s.slice(start));
+  const acc = {};
+  for (const t of terms) {
+    const o = parseMonoObj(t);
+    if (!o || o.coef[0] === 0 || o.letters in acc) return null;
+    acc[o.letters] = o.coef;
+  }
+  return "p:" + Object.keys(acc).sort().map(k => acc[k][0] + "/" + acc[k][1] + "|" + k).join(";");
+}
+function candidates(raw) {
+  const s = norm(raw);
+  const out = ["s:" + s];
+  const r = parseRat(s.replace(/^\((.*)\)$/, "$1"));
+  if (r) out.push("n:" + r[0] + "/" + r[1]);
+  const mono = parseMono(s);
+  if (mono) out.push(mono);
+  const poly = parsePoly(s);
+  if (poly) out.push(poly);
+  return out;
+}
+function isCorrect(taskNo, raw) {
+  if (!raw.trim()) return false;
+  const good = HASHES[taskNo];
+  return candidates(raw).some(c => good.includes(cyrb53(taskNo + ":" + c, SEED)));
+}
+// Две попытки: после второй проверки ответы блокируются. Число попыток
+// запоминается в браузере, чтобы перезагрузка страницы их не сбрасывала.
+const MAX_ATTEMPTS = 2;
+const STORE_KEY = "attempts:" + location.pathname + ":" + SEED;
+let state = { attempts: 0, answers: {} };
+let lastResults = null;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { return null; } }
+function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+function inputOf(taskNo) { return document.getElementById("input_" + taskNo); }
+function checkButton() { return document.querySelector('button[onclick^="checkAll"]'); }
+function setStatus(text) { document.getElementById("copyStatus").textContent = text; }
+function computeResults() {
+  let correctCount = 0;
+  const rows = [];
+  for (const taskNo in HASHES) {
+    const value = inputOf(taskNo).value;
+    const ok = isCorrect(taskNo, value);
+    if (ok) correctCount++;
+    rows.push({ taskNo, isCorrect: ok, userAnswer: value.trim() });
+  }
+  return { correctCount, total: Object.keys(HASHES).length, rows };
+}
+function attemptsNote() {
+  const left = MAX_ATTEMPTS - state.attempts;
+  return left > 0 ? " · осталась " + left + " попытка" : " · попытки закончились";
+}
+function showResults() {
+  const { correctCount, total, rows } = lastResults;
+  for (const row of rows) {
+    const verdict = document.getElementById("verdict_" + row.taskNo);
+    if (row.isCorrect) {
+      verdict.textContent = "Верно";
+      verdict.className = "verdict correct";
+    } else {
+      verdict.textContent = row.userAnswer ? "Неверно" : "Нет ответа";
+      verdict.className = "verdict wrong";
+    }
+  }
+  document.getElementById("score").textContent = "Результат: " + correctCount + " из " + total + attemptsNote();
+}
+function lockIfDone() {
+  if (state.attempts < MAX_ATTEMPTS) return;
+  for (const taskNo in HASHES) inputOf(taskNo).disabled = true;
+  const btn = checkButton();
+  if (btn) { btn.disabled = true; btn.textContent = "Попытки закончились"; btn.style.opacity = "0.55"; btn.style.cursor = "default"; }
+}
+function checkAll() {
+  if (state.attempts >= MAX_ATTEMPTS) return;
+  const answers = {};
+  let filled = 0;
+  for (const taskNo in HASHES) {
+    answers[taskNo] = inputOf(taskNo).value;
+    if (answers[taskNo].trim()) filled++;
+  }
+  if (filled === 0) { setStatus("Сначала решите задания и впишите ответы — попытка не потрачена."); return; }
+  if (state.attempts === MAX_ATTEMPTS - 1 &&
+      !confirm("Это последняя попытка. После проверки ответы нельзя будет изменить. Проверить?")) return;
+  state.attempts++;
+  state.answers = answers;
+  saveState();
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+  setStatus(state.attempts < MAX_ATTEMPTS ? "Исправьте ошибки и проверьте ещё раз." : "");
+}
+function copyResults() {
+  if (!lastResults) { setStatus("Сначала нажмите «Проверить ответы»."); return; }
+  const { correctCount, total, rows } = lastResults;
+  const lines = [document.title + " — результат: " + correctCount + " из " + total +
+                 " (попытка " + state.attempts + " из " + MAX_ATTEMPTS + ")", ""];
+  for (const row of rows) {
+    if (row.isCorrect) lines.push("✅ №" + row.taskNo + " (" + row.userAnswer + ")");
+    else lines.push("❌ №" + row.taskNo + " (мой ответ: " + (row.userAnswer || "—") + ")");
+  }
+  const ta = document.createElement("textarea");
+  ta.value = lines.join("\n");
+  ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  setStatus(ok ? "Скопировано! Отправьте учителю." : "Не удалось скопировать автоматически — выделите текст вручную.");
+}
+(function restore() {
+  const saved = loadState();
+  if (!saved || !saved.attempts) return;
+  state = saved;
+  for (const taskNo in HASHES) if (state.answers[taskNo] !== undefined) inputOf(taskNo).value = state.answers[taskNo];
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+})();
+</script>
+</body>
+</html>
