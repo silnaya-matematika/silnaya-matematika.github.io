@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ОГЭ: Теорема синусов</title>
+<style>
+  :root {
+    --bg: #f5f1fb;
+    --surface: #ffffff;
+    --surface-2: #ece2f9;
+    --ink: #2e2558;
+    --muted: #7c749a;
+    --hairline: #ddceef;
+    --accent: #6a4fc4;
+    --accent-soft: #ece2f9;
+    --correct: #2f8f5b;
+    --wrong: #c0392b;
+    --serif: Georgia, "PT Serif", "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    font-family: var(--serif);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 20px 60px;
+    color: var(--ink);
+    background: var(--bg);
+    position: relative;
+  }
+  .doodle { position: absolute; opacity: 0.5; pointer-events: none; z-index: 0; color: var(--accent); }
+  .doodle-text { font-family: var(--serif); font-weight: 700; font-style: italic; }
+  .doodle-sun   { top: 1%;  left: -64px; }
+  .doodle-bow   { top: 1%;  right: -66px; }
+  .doodle-sqrt  { top: 12%; right: -58px; font-size: 1.7rem; transform: rotate(6deg); }
+  .doodle-heart { top: 16%; left: -54px; }
+  .doodle-x2    { top: 27%; right: -50px; font-size: 1.6rem; transform: rotate(-7deg); }
+  .doodle-dots  { top: 34%; left: -48px; }
+  .doodle-flower{ top: 44%; right: -56px; }
+  .doodle-frac  { top: 52%; left: -50px; font-size: 1.5rem; transform: rotate(5deg); }
+  .doodle-pencil{ top: 63%; right: -60px; }
+  .doodle-star2 { top: 70%; left: -50px; }
+  .doodle-notebook { top: 80%; right: -56px; }
+  .doodle-shell { bottom: 0%; left: -45px; }
+  .doodle-star  { bottom: 1%; right: -48px; }
+  @media (max-width: 1040px) { .doodle { display: none; } }
+
+  .sheet { position: relative; z-index: 1; }
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .variant-badge {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 24px;
+    background: var(--surface-2);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 8px 22px;
+    border-radius: 999px;
+  }
+
+  #controls {
+    background: var(--bg);
+    padding: 12px 0;
+    margin: 24px 0 0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+  }
+  button {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 18px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #5a41ae; }
+  button.secondary { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
+  button.secondary:hover { background: var(--accent-soft); }
+  #score { font-weight: 700; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  #copyStatus { color: var(--correct); font-size: 0.9rem; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+
+  .sheet-card {
+    background: var(--surface);
+    border: 1.5px solid var(--hairline);
+    border-radius: 18px;
+    padding: 8px 26px 4px;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 6px 14px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--hairline);
+  }
+  .task:last-child { border-bottom: none; }
+  .task-num {
+    width: 38px; height: 38px;
+    background: var(--surface-2);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem;
+  }
+  .task-q { padding-top: 5px; line-height: 1.6; }
+  .task-q img { display: inline-block; vertical-align: middle; max-width: 100%; }
+  .answer-row { grid-column: 2; margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  input.ans {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    padding: 8px 10px; font-size: 1rem; border: 1px solid var(--hairline);
+    border-radius: 6px; width: 160px; background: #fff; color: var(--ink);
+  }
+  .verdict { font-weight: 600; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .verdict.correct { color: var(--correct); }
+  .verdict.wrong { color: var(--wrong); }
+
+  footer.brand {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1.5px dashed var(--hairline);
+    text-align: center;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+  }
+
+  .expr { font-size: 1.15rem; white-space: nowrap; display: inline-block; margin: 6px 0 0; }
+  .expr i { font-style: italic; }
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.85em; line-height: 1.1; margin: 0 2px; }
+  .frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 2px; }
+  .hint { text-align: center; color: var(--muted); font-size: 0.9rem; margin: -8px 0 18px; font-family: -apple-system, Segoe UI, Arial, sans-serif; line-height: 1.5; }
+  input.ans { width: 220px; }
+  .task-q { overflow-x: auto; }
+
+  .ctx { background: var(--surface-2); border-radius: 14px; padding: 16px 20px; margin: 0 0 18px; line-height: 1.55; }
+  .ctx h2 { font-size: 1.05rem; margin: 0 0 8px; }
+  .ctx p { margin: 0 0 8px; }
+  .ctx table { border-collapse: collapse; margin: 8px auto; font-size: 0.74rem; background: #fff; }
+  .ctx th, .ctx td { border: 1px solid #b9a9e0; padding: 2px 5px; text-align: center; }
+  .ctx .scroll { overflow-x: auto; }
+  .task-q table { border-collapse: collapse; margin: 8px 0; font-size: 0.9rem; }
+  .task-q th, .task-q td { border: 1px solid #b9a9e0; padding: 3px 8px; text-align: center; }
+  .task-q img { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<svg class="doodle doodle-sun" width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="23" cy="23" r="9"/><path d="M23 2v7M23 37v7M2 23h7M37 23h7M8 8l5 5M33 33l5 5M38 8l-5 5M13 33l-5 5"/></svg>
+<svg class="doodle doodle-bow" width="50" height="42" viewBox="0 0 50 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M25 18c-6-10-22-10-22 0 0 8 14 8 22 14 8-6 22-6 22-14 0-10-16-10-22 0Z"/><path d="M25 18v22"/></svg>
+<svg class="doodle doodle-shell" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 6c9 3 15 11 15 21H6c0-10 6-18 15-21Z"/><path d="M21 8v19M14 12l3 15M28 12l-3 15"/></svg>
+<svg class="doodle doodle-star" width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<span class="doodle doodle-text doodle-sqrt">&radic;a</span>
+<svg class="doodle doodle-heart" width="36" height="32" viewBox="0 0 36 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 29C7 21 2 15 2 9.5 2 4.8 5.6 2 9.6 2c3 0 5.8 1.8 8.4 6 2.6-4.2 5.4-6 8.4-6 4 0 7.6 2.8 7.6 7.5 0 5.5-5 11.5-16 19.5Z"/></svg>
+<span class="doodle doodle-text doodle-x2">x&sup2;</span>
+<svg class="doodle doodle-dots" width="34" height="34" viewBox="0 0 34 34" fill="currentColor"><circle cx="4" cy="6" r="2.2"/><circle cx="16" cy="4" r="2.2"/><circle cx="28" cy="9" r="2.2"/><circle cx="8" cy="18" r="2.2"/><circle cx="22" cy="20" r="2.2"/><circle cx="14" cy="30" r="2.2"/></svg>
+<svg class="doodle doodle-flower" width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="3.4"/><ellipse cx="19" cy="8" rx="4.4" ry="6.5"/><ellipse cx="19" cy="30" rx="4.4" ry="6.5"/><ellipse cx="8" cy="19" rx="6.5" ry="4.4"/><ellipse cx="30" cy="19" rx="6.5" ry="4.4"/></svg>
+<span class="doodle doodle-text doodle-frac">a&frasl;b</span>
+<svg class="doodle doodle-pencil" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 35l1.5-8L28 7.5l6.5 6.5L15 34.5 7 36Z"/><path d="M25.5 10.5l6.5 6.5M8.5 27l6.5 6.5"/></svg>
+<svg class="doodle doodle-star2" width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<svg class="doodle doodle-notebook" width="34" height="40" viewBox="0 0 34 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="26" height="36" rx="2.5"/><path d="M10 12h14M10 19h14M10 26h9"/></svg>
+
+<div class="sheet"><noscript><div style="background:#fdecea;color:#8a1c12;border:1px solid #f5c2bc;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-family:-apple-system,Arial,sans-serif;">Проверка ответов здесь не работает. Откройте тест по ссылке в браузере (Safari или Chrome).</div></noscript>
+<h1>ОГЭ, математика: теорема синусов</h1>
+<div class="variant-badge">Теорема синусов · вариант 1</div>
+<div class="hint">Решите задачи 1–6. Ответ в каждой задаче — число.</div>
+<form id="testForm" onsubmit="return false;">
+<div class="sheet-card">
+<div class="task">
+  <div class="task-num">1</div>
+  <div class="task-q"><p>Углы <i>B</i> и <i>C</i> треугольника <i>ABC</i> равны соответственно 67° и 83°. Найдите <i>BC</i>, если радиус окружности, описанной около треугольника <i>ABC</i>, равен 16.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_1" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_1"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">2</div>
+  <div class="task-q"><p><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9ItCh0LvQvtC5XzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTE3LjA5OXB4IiBoZWlnaHQ9IjE0My45MzlweCIgdmlld0JveD0iMCAtNy45NDUgMTE3LjA5OSAxNDMuOTM5IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgLTcuOTQ1IDExNy4wOTkgMTQzLjkzOSINCgkgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8Zz4NCgk8Zz4NCgkJPGc+DQoJCQk8ZGVmcz4NCgkJCQk8cmVjdCBpZD0iU1ZHSURfMV8iIHg9IjAiIHk9IjExOS43NDUiIHdpZHRoPSIxNC42ODkiIGhlaWdodD0iMTUuNTk5Ii8+DQoJCQk8L2RlZnM+DQoJCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzJfIj4NCgkJCQk8dXNlIHhsaW5rOmhyZWY9IiNTVkdJRF8xXyIgIG92ZXJmbG93PSJ2aXNpYmxlIi8+DQoJCQk8L2NsaXBQYXRoPg0KCQkJPGcgY2xpcC1wYXRoPSJ1cmwoI1NWR0lEXzJfKSI+DQoJCQkJPHBhdGggZmlsbD0iIzAxMDIwMiIgZD0iTTExLjE1NSwxMjMuMDQybC0wLjczOCw3Ljg3NmMtMC4wMzksMC4zNjgtMC4wNTksMC42MDktMC4wNTksMC43MjhjMCwwLjE4NywwLjAzNiwwLjMyOCwwLjEwNywwLjQyNw0KCQkJCQljMC4wOTIsMC4xMzUsMC4yMTUsMC4yMzQsMC4zNjksMC4zYzAuMTU0LDAuMDY0LDAuNDE3LDAuMDk4LDAuNzg2LDAuMDk4bC0wLjA3OSwwLjI2aC0zLjgzbDAuMDc5LTAuMjZoMC4xNjUNCgkJCQkJYzAuMzEyLDAsMC41NjMtMC4wNjMsMC43Ni0wLjE5NGMwLjE0LTAuMDg4LDAuMjQ3LTAuMjMzLDAuMzIzLTAuNDM4YzAuMDUzLTAuMTQ2LDAuMTA0LTAuNDgzLDAuMTUtMS4wMjFsMC4xMTUtMS4ySDYuNTIxDQoJCQkJCWwtMC45OSwxLjMwNmMtMC4yMjUsMC4yOTMtMC4zNjUsMC41MDQtMC40MjMsMC42MzJjLTAuMDU4LDAuMTI5LTAuMDg2LDAuMjQ4LTAuMDg2LDAuMzU5YzAsMC4xNDgsMC4wNjMsMC4yNzYsMC4xODgsMC4zODUNCgkJCQkJYzAuMTI0LDAuMTA1LDAuMzMsMC4xNjUsMC42MTcsMC4xNzRsLTAuMDc5LDAuMjZIMi44N2wwLjA3OS0wLjI2YzAuMzU0LTAuMDE0LDAuNjY2LTAuMTI5LDAuOTM2LTAuMzQ1DQoJCQkJCWMwLjI3MS0wLjIxNywwLjY3NC0wLjY3OSwxLjIwOC0xLjM4N2w1LjgxMS03LjY5NGgwLjI1MkwxMS4xNTUsMTIzLjA0MkwxMS4xNTUsMTIzLjA0MnogTTkuNzM0LDEyNS4zNjdsLTIuODE4LDMuNzM0aDIuNDQ1DQoJCQkJCUw5LjczNCwxMjUuMzY3eiIvPg0KCQkJPC9nPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxnPg0KCQkJPGRlZnM+DQoJCQkJPHJlY3QgaWQ9IlNWR0lEXzNfIiB4PSIxMDIuNDA5IiB5PSItNy45NDUiIHdpZHRoPSIxNC42ODkiIGhlaWdodD0iMTUuNjAxIi8+DQoJCQk8L2RlZnM+DQoJCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzRfIj4NCgkJCQk8dXNlIHhsaW5rOmhyZWY9IiNTVkdJRF8zXyIgIG92ZXJmbG93PSJ2aXNpYmxlIi8+DQoJCQk8L2NsaXBQYXRoPg0KCQkJPGcgY2xpcC1wYXRoPSJ1cmwoI1NWR0lEXzRfKSI+DQoJCQkJPHBhdGggZmlsbD0iIzAxMDIwMiIgZD0iTTEwNy40NzgtNC4xNTNsMC4xMDEtMC4yNThoMy40NzNjMC41ODQsMCwxLjEwNCwwLjA4OCwxLjU2MSwwLjI2N2MwLjQ1NiwwLjE3NywwLjgsMC40MjMsMS4wMjUsMC43MzkNCgkJCQkJYzAuMjI5LDAuMzE3LDAuMzQxLDAuNjUyLDAuMzQxLDEuMDA3YzAsMC41NDQtMC4yMDIsMS4wMzYtMC42MDUsMS40NzhjLTAuNDAyLDAuNDM5LTEuMDYzLDAuNzY1LTEuOTc3LDAuOTc0DQoJCQkJCWMwLjU4OCwwLjIxNSwxLjAyMSwwLjQ5OCwxLjI5OCwwLjg1M2MwLjI3NywwLjM1NCwwLjQxNiwwLjc0MiwwLjQxNiwxLjE2NmMwLDAuNDcxLTAuMTI0LDAuOTE5LTAuMzczLDEuMzQ5DQoJCQkJCWMtMC4yNDcsMC40MjgtMC41NjYsMC43NjEtMC45NTYsMC45OThjLTAuMzkxLDAuMjM3LTAuODU5LDAuNDEyLTEuNDA5LDAuNTIzYy0wLjM5NCwwLjA3OS0xLjAwNSwwLjExOS0xLjgzNywwLjExOWgtMy41NjUNCgkJCQkJbDAuMDkzLTAuMjU5YzAuMzczLTAuMDA5LDAuNjI3LTAuMDQ0LDAuNzYyLTAuMTA0YzAuMTktMC4wNzgsMC4zMjYtMC4xODUsMC40MDgtMC4zMTNjMC4xMTQtMC4xNzcsMC4yNjktMC41ODIsMC40NTktMS4yMTUNCgkJCQkJbDEuNzQyLTUuNzMyYzAuMTQ3LTAuNDgzLDAuMjI0LTAuODI0LDAuMjI0LTEuMDJjMC0wLjE3Mi0wLjA2NS0wLjMxLTAuMTk3LTAuNDA5Yy0wLjEzMi0wLjEwMS0wLjM4MS0wLjE0OS0wLjc0OS0wLjE0OQ0KCQkJCQlDMTA3LjYyNS00LjE0NCwxMDcuNTQ5LTQuMTQ3LDEwNy40NzgtNC4xNTN6IE0xMDcuNTIxLDQuNDQ0YzAuNTE3LDAuMDY0LDAuOTIsMC4wOTksMS4yMTIsMC4wOTkNCgkJCQkJYzAuNzQ2LDAsMS40MDctMC4yMiwxLjk4My0wLjY1NmMwLjU3NS0wLjQzOCwwLjg2My0xLjAzLDAuODYzLTEuNzhjMC0wLjU3MS0wLjE4LTEuMDIxLTAuNTM0LTEuMzQxDQoJCQkJCWMtMC4zNTUtMC4zMi0wLjkzMi0wLjQ4LTEuNzI3LTAuNDhjLTAuMTUyLDAtMC4zNCwwLjAwNy0wLjU2LDAuMDIxTDEwNy41MjEsNC40NDR6IE0xMDguOTM0LTAuMjIxDQoJCQkJCWMwLjMxMiwwLjAxLDAuNTM1LDAuMDE1LDAuNjc0LDAuMDE1YzAuOTk0LDAsMS43MzQtMC4yMSwyLjIyMS0wLjYzMmMwLjQ4NS0wLjQyMywwLjcyOS0wLjk0OSwwLjcyOS0xLjU4Mg0KCQkJCQljMC0wLjQ3OS0wLjE0Ny0wLjg1NC0wLjQ0NS0xLjEyMWMtMC4yOTYtMC4yNjktMC43Ny0wLjQwMi0xLjQyLTAuNDAyYy0wLjE3MiwwLTAuMzkyLDAuMDI4LTAuNjU5LDAuMDg0TDEwOC45MzQtMC4yMjF6Ii8+DQoJCQk8L2c+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8Zz4NCgk8Zz4NCgkJPGc+DQoJCQk8ZGVmcz4NCgkJCQk8cmVjdCBpZD0iU1ZHSURfNV8iIHg9Ijg0LjA2IiB5PSIxMTkuMDk2IiB3aWR0aD0iMTUuOTg4IiBoZWlnaHQ9IjE2Ljg5OCIvPg0KCQkJPC9kZWZzPg0KCQkJPGNsaXBQYXRoIGlkPSJTVkdJRF82XyI+DQoJCQkJPHVzZSB4bGluazpocmVmPSIjU1ZHSURfNV8iICBvdmVyZmxvdz0idmlzaWJsZSIvPg0KCQkJPC9jbGlwUGF0aD4NCgkJCTxnIGNsaXAtcGF0aD0idXJsKCNTVkdJRF82XykiPg0KCQkJCTxwYXRoIGZpbGw9IiMwMTAyMDIiIGQ9Ik05Ni4zNzksMTIyLjQxMmwtMC43MjQsMy4wNjRoLTAuMjU4bC0wLjAyOS0wLjc3Yy0wLjAyMi0wLjI3OC0wLjA3Ny0wLjUyNy0wLjE2My0wLjc0Nw0KCQkJCQljLTAuMDg3LTAuMjE5LTAuMjE2LTAuNDA3LTAuMzg4LTAuNTY3Yy0wLjE3Mi0wLjE2MS0wLjM5LTAuMjg3LTAuNjUtMC4zNzhjLTAuMjYyLTAuMDkxLTAuNTU1LTAuMTM3LTAuODczLTAuMTM3DQoJCQkJCWMtMC44NTQsMC0xLjYwMiwwLjIyOS0yLjI0LDAuNjg2Yy0wLjgxNCwwLjU4Mi0xLjQ1NCwxLjQwMy0xLjkxOCwyLjQ2NmMtMC4zODIsMC44NzUtMC41NzEsMS43NjItMC41NzEsMi42NTkNCgkJCQkJYzAsMC45MTcsMC4yNzMsMS42NDcsMC44MjIsMi4xOTVzMS4yNjMsMC44MiwyLjE0MSwwLjgyYzAuNjYzLDAsMS4yNTQtMC4xNDYsMS43NzEtMC40MzVjMC41MTktMC4yODgsMC45OTgtMC43MzEsMS40NC0xLjMzMw0KCQkJCQloMC4zMzdjLTAuNTI0LDAuODEzLTEuMTA2LDEuNDE0LTEuNzQ1LDEuNzk4Yy0wLjY0MSwwLjM4NS0xLjQwNSwwLjU3Ni0yLjI5OSwwLjU3NmMtMC43OTIsMC0xLjQ5Mi0wLjE2Mi0yLjEwNC0wLjQ4NA0KCQkJCQljLTAuNjA5LTAuMzI0LTEuMDc0LTAuNzc3LTEuMzk2LTEuMzY1Yy0wLjMxOC0wLjU4Ny0wLjQ3OS0xLjIxOC0wLjQ3OS0xLjg5NGMwLTEuMDMyLDAuMjg0LTIuMDM4LDAuODUzLTMuMDE3DQoJCQkJCWMwLjU2Ny0wLjk3OSwxLjM0OC0xLjc0NSwyLjMzNy0yLjMwNWMwLjk5LTAuNTYsMS45ODgtMC44MzgsMi45OTUtMC44MzhjMC40NzQsMCwxLjAwMiwwLjEwOCwxLjU4OSwwLjMyOA0KCQkJCQljMC4yNTksMC4wOTMsMC40NDQsMC4xNCwwLjU2LDAuMTRzMC4yMTYtMC4wMjIsMC4zMDItMC4wNjhjMC4wODYtMC4wNDcsMC4yMjktMC4xODEsMC40My0wLjM5N0w5Ni4zNzksMTIyLjQxMkw5Ni4zNzksMTIyLjQxMnoNCgkJCQkJIi8+DQoJCQk8L2c+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMTAyMDIiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iOCIgeDE9IjE0LjM1MiIgeTE9IjExOS44NjEiIHgyPSI4Ny4xNzMiIHkyPSIxMTkuODYxIi8+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMTAyMDIiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iOCIgeDE9IjE0LjM1MiIgeTE9IjExOS44NjEiIHgyPSIxMDguNjczIiB5Mj0iNy42NTYiLz4NCjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAxMDIwMiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSI4IiB4MT0iMTA4LjY3MyIgeTE9IjcuNjU2IiB4Mj0iODcuMTczIiB5Mj0iMTE5Ljg2MSIvPg0KPC9zdmc+DQoK" alt="" style="width:min(100%,250px);height:auto;display:block;margin:10px auto;">В треугольнике <i>ABC</i> угол <i>A</i> равен 45°, угол <i>B</i> равен 30°, <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnPz4KPCEtLS0xLjgtLT4KPHN2ZyB2ZXJzaW9uPScxLjEnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZycgeG1sbnM6eGxpbms9J2h0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsnIHdpZHRoPSc1MS41cHQnIGhlaWdodD0nMTIuMHB0JyB2aWV3Qm94PScyMTAuOSA3Mi4yIDUxLjUgMTIuMCc+CjxkZWZzPgo8cGF0aCBpZD0nZzctNTgnIGQ9J00yLjEtLjZDMi4xLS45IDEuOC0xLjIgMS41LTEuMlMuOS0uOSAuOS0uNlMxLjIgMCAxLjUgMFMyLjEtLjMgMi4xLS42WicvPgo8dXNlIGlkPSdnMTEtNTAnIHhsaW5rOmhyZWY9JyNnMy01MCcvPgo8dXNlIGlkPSdnMTEtNTYnIHhsaW5rOmhyZWY9JyNnMy01NicvPgo8cGF0aCBpZD0nZzMtNTAnIGQ9J001LjItMS41TDUtMS41QzQuNi0uOSA0LjUtLjggNC0uOEgxLjRMMy4yLTIuN0M0LjItMy43IDQuNi00LjYgNC42LTUuNEM0LjYtNi41IDMuNy03LjMgMi42LTcuM0MyLTcuMyAxLjQtNy4xIDEtNi43Qy43LTYuMyAuNS02IC4zLTUuMkwuNi01LjFDMS02LjIgMS40LTYuNSAyLjEtNi41QzMuMS02LjUgMy43LTUuOSAzLjctNUMzLjctNC4yIDMuMi0zLjIgMi4zLTIuMkwuMy0uMVYwSDQuNkw1LjItMS41WicvPgo8cGF0aCBpZD0nZzMtNTYnIGQ9J00zLjItNEM0LjItNC42IDQuNi01LjEgNC42LTUuOEM0LjYtNi43IDMuOC03LjMgMi43LTcuM0MxLjYtNy4zIC43LTYuNiAuNy01LjZDLjctNC45IC45LTQuNiAyLTMuNkMuOC0yLjcgLjYtMi40IC42LTEuNkMuNi0uNiAxLjUgLjIgMi43IC4yQzQgLjIgNC44LS42IDQuOC0xLjdDNC44LTIuNSA0LjUtMy4xIDMuMi00Wk0zLTIuOUMzLjctMi4zIDQtMiA0LTEuM0M0LS42IDMuNS0uMiAyLjgtLjJDMi0uMiAxLjQtLjggMS40LTEuN0MxLjQtMi40IDEuNy0yLjkgMi4zLTMuNEwzLTIuOVpNMi44LTQuMkMxLjktNC45IDEuNS01LjQgMS41LTZDMS41LTYuNiAyLTcgMi43LTdDMy40LTcgMy45LTYuNiAzLjktNS44QzMuOS01LjIgMy42LTQuNyAyLjktNC4zQzIuOS00LjMgMi45LTQuMyAyLjgtNC4yWicvPgo8cGF0aCBpZD0nZzgtNjYnIGQ9J00tLjEgMEgzQzQuNyAwIDUuOS0uOSA1LjktMi4yQzUuOS0yLjYgNS43LTMgNS41LTMuMkM1LjMtMy40IDUuMS0zLjYgNC41LTMuOEM1LjMtNCA1LjYtNC4xIDUuOS00LjRDNi4yLTQuNyA2LjQtNS4xIDYuNC01LjVDNi40LTYuNSA1LjYtNy4xIDQuMi03LjFIMS40Vi02LjlDMi4xLTYuOSAyLjItNi44IDIuMi02LjVDMi4yLTYuMyAyLjItNiAyLjEtNS44TC44LTFDLjYtLjMgLjUtLjMtLjEtLjJWMFpNMi42LTMuNkMzLjMtMy42IDMuNy0zLjYgNC0zLjVDNC40LTMuMyA0LjctMi44IDQuNy0yLjJDNC43LTEgMy45LS4zIDIuNi0uM0MyLjEtLjMgMS45LS41IDEuOS0uOEMxLjktLjkgMi0xLjQgMi4yLTIuM0MyLjQtMi44IDIuNC0zIDIuNi0zLjZaTTMuNC02LjVDMy41LTYuNyAzLjYtNi44IDQtNi44QzQuOS02LjggNS4zLTYuNCA1LjMtNS42QzUuMy01IDUtNC41IDQuNi00LjJDNC4yLTQgMy43LTMuOSAyLjctMy45TDMuNC02LjVaJy8+CjxwYXRoIGlkPSdnOC02NycgZD0nTTcuMS01LjFMNy41LTcuMkg3LjNDNy4yLTcgNy4xLTcgNi44LTdDNi44LTcgNi42LTcgNi40LTcuMUM1LjktNy4yIDUuNS03LjIgNS4xLTcuMkMyLjgtNy4yIC43LTUuMSAuNy0yLjZDLjctMSAxLjkgLjIgMy42IC4yQzQuNyAuMiA1LjUtLjMgNi41LTEuNEw2LjMtMS42QzUuNC0uNiA0LjctLjMgMy44LS4zQzIuNi0uMyAxLjktMS4xIDEuOS0yLjVDMS45LTMuOCAyLjUtNS4xIDMuMy02QzMuOC02LjUgNC41LTYuOCA1LjItNi44QzYuMi02LjggNi44LTYuMyA2LjktNS4xTDcuMS01LjFaJy8+CjxwYXRoIGlkPSdnMTItNjEnIGQ9J003LjUtMy42QzcuNi0zLjYgNy44LTMuNiA3LjgtMy44UzcuNi00IDcuNS00SDFDLjgtNCAuNi00IC42LTMuOFMuOC0zLjYgMS0zLjZINy41Wk03LjUtMS40QzcuNi0xLjQgNy44LTEuNCA3LjgtMS43UzcuNi0xLjkgNy41LTEuOUgxQy44LTEuOSAuNi0xLjkgLjYtMS43Uy44LTEuNCAxLTEuNEg3LjVaJy8+CjxwYXRoIGlkPSdnMS0wJyBkPSdNNy4yLTIuNUM3LjMtMi41IDcuNS0yLjUgNy41LTIuN1M3LjMtMi45IDcuMi0yLjlIMS4zQzEuMS0yLjkgLjktMi45IC45LTIuN1MxLjEtMi41IDEuMy0yLjVINy4yWicvPgo8cGF0aCBpZD0nZzEtMTEyJyBkPSdNNC4yIDkuM0wyLjMgNS4xQzIuMiA0LjkgMi4yIDQuOSAyLjIgNC45QzIuMSA0LjkgMi4xIDQuOSAyIDVMLjkgNS44Qy44IDUuOSAuOCA1LjkgLjggNS45Qy44IDYgLjggNi4xIC45IDYuMUMxIDYuMSAxLjIgNS45IDEuMyA1LjhDMS4zIDUuOCAxLjUgNS42IDEuNiA1LjZMMy44IDEwLjNDMy44IDEwLjQgMy45IDEwLjQgNCAxMC40QzQuMiAxMC40IDQuMiAxMC40IDQuMyAxMC4yTDkuMiAwQzkuMy0uMiA5LjMtLjIgOS4zLS4yQzkuMy0uMyA5LjItLjQgOS4xLS40QzktLjQgOC45LS40IDguOC0uMkw0LjIgOS4zWicvPgo8L2RlZnM+CjxnIGlkPSdwYWdlMSc+Cgo8dXNlIHg9JzIxMi40JyB5PSc4Mi4zJyB4bGluazpocmVmPScjZzgtNjYnLz4KPHVzZSB4PScyMTguNScgeT0nODIuMycgeGxpbms6aHJlZj0nI2c4LTY3Jy8+Cjx1c2UgeD0nMjI4LjQnIHk9JzgyLjMnIHhsaW5rOmhyZWY9JyNnMTItNjEnLz4KPHVzZSB4PScyMzkuMycgeT0nODIuMycgeGxpbms6aHJlZj0nI2cxMS01NicvPgo8dXNlIHg9JzI0NC44JyB5PSc3Mi42JyB4bGluazpocmVmPScjZzEtMTEyJy8+CjxyZWN0IHg9JzI1My45JyB5PSc3Mi4yJyBoZWlnaHQ9Jy40JyB3aWR0aD0nNS41Jy8+Cjx1c2UgeD0nMjUzLjknIHk9JzgyLjMnIHhsaW5rOmhyZWY9JyNnMTEtNTAnLz4KPHVzZSB4PScyNTkuMycgeT0nODIuMycgeGxpbms6aHJlZj0nI2c3LTU4Jy8+CjwvZz4KPC9zdmc+" alt="" style="max-width:100%;height:auto;display:block;margin:10px auto;"> Найдите <i>AC</i>.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_2" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_2"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">3</div>
+  <div class="task-q"><p><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9ItCh0LvQvtC5XzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTEwLjcxOXB4IiBoZWlnaHQ9IjEyOC4xNTVweCIgdmlld0JveD0iMCA3Ljc2NyAxMTAuNzE5IDEyOC4xNTUiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCA3Ljc2NyAxMTAuNzE5IDEyOC4xNTUiDQoJIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGc+DQoJPGc+DQoJCTxnPg0KCQkJPGc+DQoJCQkJPGRlZnM+DQoJCQkJCTxyZWN0IGlkPSJTVkdJRF8xXyIgeT0iMTE5Ljc0NSIgd2lkdGg9IjE0LjY4OSIgaGVpZ2h0PSIxNS41OTkiLz4NCgkJCQk8L2RlZnM+DQoJCQkJPGNsaXBQYXRoIGlkPSJTVkdJRF8yXyI+DQoJCQkJCTx1c2UgeGxpbms6aHJlZj0iI1NWR0lEXzFfIiAgb3ZlcmZsb3c9InZpc2libGUiLz4NCgkJCQk8L2NsaXBQYXRoPg0KCQkJCTxnIGNsaXAtcGF0aD0idXJsKCNTVkdJRF8yXykiPg0KCQkJCQk8cGF0aCBmaWxsPSIjMDEwMjAyIiBkPSJNMTEuMTU1LDEyMy4wNDJsLTAuNzM4LDcuODc2Yy0wLjAzOSwwLjM2OC0wLjA1OSwwLjYwOS0wLjA1OSwwLjcyOWMwLDAuMTg3LDAuMDM2LDAuMzI4LDAuMTA3LDAuNDI3DQoJCQkJCQljMC4wOTIsMC4xMzUsMC4yMTUsMC4yMzQsMC4zNjksMC4zYzAuMTU0LDAuMDY0LDAuNDE3LDAuMDk5LDAuNzg2LDAuMDk5bC0wLjA3OSwwLjI2aC0zLjgzbDAuMDc5LTAuMjZoMC4xNjUNCgkJCQkJCWMwLjMxMiwwLDAuNTYzLTAuMDYzLDAuNzYtMC4xOTRjMC4xNC0wLjA4OCwwLjI0Ny0wLjIzMywwLjMyMy0wLjQzOGMwLjA1My0wLjE0NiwwLjEwNC0wLjQ4MiwwLjE1LTEuMDIxbDAuMTE1LTEuMkg2LjUyMQ0KCQkJCQkJbC0wLjk5LDEuMzA2Yy0wLjIyNSwwLjI5My0wLjM2NSwwLjUwNC0wLjQyMywwLjYzM3MtMC4wODYsMC4yNDgtMC4wODYsMC4zNThjMCwwLjE0OCwwLjA2MywwLjI3NiwwLjE4OCwwLjM4NQ0KCQkJCQkJYzAuMTI0LDAuMTA1LDAuMzMsMC4xNjUsMC42MTcsMC4xNzVsLTAuMDc5LDAuMjZIMi44N2wwLjA3OS0wLjI2YzAuMzU0LTAuMDE1LDAuNjY2LTAuMTMsMC45MzYtMC4zNDYNCgkJCQkJCWMwLjI3MS0wLjIxNywwLjY3NC0wLjY3OSwxLjIwOC0xLjM4N2w1LjgxMS03LjY5NGgwLjI1MkwxMS4xNTUsMTIzLjA0MkwxMS4xNTUsMTIzLjA0MnogTTkuNzM0LDEyNS4zNjdsLTIuODE4LDMuNzM0aDIuNDQ1DQoJCQkJCQlMOS43MzQsMTI1LjM2N3oiLz4NCgkJCQk8L2c+DQoJCQk8L2c+DQoJCTwvZz4NCgk8L2c+DQo8L2c+DQo8Zz4NCgk8Zz4NCgkJPGc+DQoJCQk8Zz4NCgkJCQk8ZGVmcz4NCgkJCQkJPHJlY3QgaWQ9IlNWR0lEXzNfIiB4PSI2NC4yOTUiIHk9IjcuNzY3IiB3aWR0aD0iMTQuNjg5IiBoZWlnaHQ9IjE1LjYwMSIvPg0KCQkJCTwvZGVmcz4NCgkJCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzRfIj4NCgkJCQkJPHVzZSB4bGluazpocmVmPSIjU1ZHSURfM18iICBvdmVyZmxvdz0idmlzaWJsZSIvPg0KCQkJCTwvY2xpcFBhdGg+DQoJCQkJPGcgY2xpcC1wYXRoPSJ1cmwoI1NWR0lEXzRfKSI+DQoJCQkJCTxwYXRoIGZpbGw9IiMwMTAyMDIiIGQ9Ik02OS4zNjMsMTEuNTU5bDAuMTAyLTAuMjU5aDMuNDczYzAuNTg0LDAsMS4xMDQsMC4wODgsMS41NjEsMC4yNjgNCgkJCQkJCWMwLjQ1NiwwLjE3NywwLjgwMSwwLjQyMywxLjAyNSwwLjczOGMwLjIyOSwwLjMxNywwLjM0MSwwLjY1MiwwLjM0MSwxLjAwOGMwLDAuNTQ0LTAuMjAyLDEuMDM2LTAuNjA0LDEuNDc4DQoJCQkJCQljLTAuNDAyLDAuNDM5LTEuMDYzLDAuNzY1LTEuOTc4LDAuOTc1YzAuNTg4LDAuMjE1LDEuMDIxLDAuNDk3LDEuMjk4LDAuODUzYzAuMjc3LDAuMzU0LDAuNDE2LDAuNzQyLDAuNDE2LDEuMTY2DQoJCQkJCQljMCwwLjQ3MS0wLjEyNCwwLjkxOS0wLjM3MywxLjM0OWMtMC4yNDYsMC40MjktMC41NjYsMC43NjItMC45NTUsMC45OThjLTAuMzkyLDAuMjM3LTAuODU5LDAuNDEyLTEuNDEsMC41MjMNCgkJCQkJCWMtMC4zOTQsMC4wNzktMS4wMDQsMC4xMTktMS44MzYsMC4xMTloLTMuNTY1bDAuMDkzLTAuMjZjMC4zNzMtMC4wMDksMC42MjctMC4wNDQsMC43NjItMC4xMDQNCgkJCQkJCWMwLjE5LTAuMDc4LDAuMzI2LTAuMTg1LDAuNDA4LTAuMzEzYzAuMTE0LTAuMTc3LDAuMjctMC41ODEsMC40NTktMS4yMTVsMS43NDItNS43MzFjMC4xNDYtMC40ODMsMC4yMjUtMC44MjQsMC4yMjUtMS4wMjENCgkJCQkJCWMwLTAuMTcyLTAuMDY1LTAuMzEtMC4xOTctMC40MDljLTAuMTMzLTAuMTAxLTAuMzgxLTAuMTQ4LTAuNzUtMC4xNDhDNjkuNTEyLDExLjU2OCw2OS40MzYsMTEuNTY1LDY5LjM2MywxMS41NTl6DQoJCQkJCQkgTTY5LjQwNiwyMC4xNTZjMC41MTgsMC4wNjMsMC45MiwwLjA5OSwxLjIxMiwwLjA5OWMwLjc0NiwwLDEuNDA3LTAuMjIsMS45ODMtMC42NTVjMC41NzQtMC40MzgsMC44NjMtMS4wMywwLjg2My0xLjc4DQoJCQkJCQljMC0wLjU3MS0wLjE4MS0xLjAyMS0wLjUzNS0xLjM0MWMtMC4zNTQtMC4zMi0wLjkzMi0wLjQ4LTEuNzI3LTAuNDhjLTAuMTUyLDAtMC4zNCwwLjAwNy0wLjU2MSwwLjAyMUw2OS40MDYsMjAuMTU2eg0KCQkJCQkJIE03MC44MTksMTUuNDkxYzAuMzEyLDAuMDEsMC41MzUsMC4wMTUsMC42NzQsMC4wMTVjMC45OTQsMCwxLjczMy0wLjIxLDIuMjIyLTAuNjMyYzAuNDg0LTAuNDIzLDAuNzI5LTAuOTQ5LDAuNzI5LTEuNTgyDQoJCQkJCQljMC0wLjQ3OS0wLjE0Ni0wLjg1NC0wLjQ0NS0xLjEyMWMtMC4yOTYtMC4yNjktMC43Ny0wLjQwMS0xLjQyLTAuNDAxYy0wLjE3MiwwLTAuMzkyLDAuMDI3LTAuNjU4LDAuMDg0TDcwLjgxOSwxNS40OTF6Ii8+DQoJCQkJPC9nPg0KCQkJPC9nPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxnPg0KCQkJPGc+DQoJCQkJPGRlZnM+DQoJCQkJCTxyZWN0IGlkPSJTVkdJRF81XyIgeD0iOTQuNzMxIiB5PSIxMTkuMDI1IiB3aWR0aD0iMTUuOTg3IiBoZWlnaHQ9IjE2Ljg5NyIvPg0KCQkJCTwvZGVmcz4NCgkJCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzZfIj4NCgkJCQkJPHVzZSB4bGluazpocmVmPSIjU1ZHSURfNV8iICBvdmVyZmxvdz0idmlzaWJsZSIvPg0KCQkJCTwvY2xpcFBhdGg+DQoJCQkJPGcgY2xpcC1wYXRoPSJ1cmwoI1NWR0lEXzZfKSI+DQoJCQkJCTxwYXRoIGZpbGw9IiMwMTAyMDIiIGQ9Ik0xMDcuMDUsMTIyLjM0MWwtMC43MjUsMy4wNjRoLTAuMjU4bC0wLjAyOC0wLjc3MWMtMC4wMjItMC4yNzgtMC4wNzctMC41MjYtMC4xNjMtMC43NDcNCgkJCQkJCWMtMC4wODctMC4yMTktMC4yMTctMC40MDctMC4zODktMC41NjZjLTAuMTcyLTAuMTYxLTAuMzg5LTAuMjg3LTAuNjQ5LTAuMzc4Yy0wLjI2My0wLjA5Mi0wLjU1Ni0wLjEzOC0wLjg3My0wLjEzOA0KCQkJCQkJYy0wLjg1NCwwLTEuNjAzLDAuMjI5LTIuMjM5LDAuNjg3Yy0wLjgxNCwwLjU4Mi0xLjQ1NSwxLjQwMi0xLjkxOCwyLjQ2NmMtMC4zODMsMC44NzUtMC41NzIsMS43NjItMC41NzIsMi42NTkNCgkJCQkJCWMwLDAuOTE3LDAuMjczLDEuNjQ2LDAuODIyLDIuMTk0YzAuNTQ5LDAuNTQ5LDEuMjY0LDAuODIsMi4xNDEsMC44MmMwLjY2NCwwLDEuMjU1LTAuMTQ2LDEuNzcxLTAuNDM1DQoJCQkJCQljMC41Mi0wLjI4OCwwLjk5OC0wLjczMSwxLjQzOS0xLjMzM2gwLjMzOGMtMC41MjMsMC44MTMtMS4xMDUsMS40MTQtMS43NDUsMS43OThjLTAuNjQyLDAuMzg1LTEuNDA1LDAuNTc2LTIuMjk5LDAuNTc2DQoJCQkJCQljLTAuNzkyLDAtMS40OTItMC4xNjItMi4xMDQtMC40ODRjLTAuNjA5LTAuMzI0LTEuMDc0LTAuNzc3LTEuMzk2LTEuMzY1Yy0wLjMxOC0wLjU4Ny0wLjQ3OS0xLjIxOC0wLjQ3OS0xLjg5NA0KCQkJCQkJYzAtMS4wMzIsMC4yODQtMi4wMzgsMC44NTQtMy4wMThjMC41NjYtMC45NzksMS4zNDgtMS43NDQsMi4zMzctMi4zMDVjMC45ODktMC41NiwxLjk4Ny0wLjgzOCwyLjk5NS0wLjgzOA0KCQkJCQkJYzAuNDc0LDAsMS4wMDIsMC4xMDgsMS41ODksMC4zMjhjMC4yNTksMC4wOTMsMC40NDQsMC4xNCwwLjU2LDAuMTRjMC4xMTYsMCwwLjIxNy0wLjAyMSwwLjMwMy0wLjA2Nw0KCQkJCQkJYzAuMDg2LTAuMDQ4LDAuMjI5LTAuMTgyLDAuNDMtMC4zOTdMMTA3LjA1LDEyMi4zNDFMMTA3LjA1LDEyMi4zNDF6Ii8+DQoJCQkJPC9nPg0KCQkJPC9nPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDEwMjAyIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjgiIHgxPSIxNC4zNTIiIHkxPSIxMTkuODYxIiB4Mj0iOTUuMzYxIiB5Mj0iMTE5Ljg2MSIvPg0KPGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDEwMjAyIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjgiIHgxPSIxNC4zNTIiIHkxPSIxMTkuODYxIiB4Mj0iNjkuNTU0IiB5Mj0iMjQuMjQ5Ii8+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwMTAyMDIiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iOCIgeDE9Ijk1LjM2MSIgeTE9IjExOS44NjEiIHgyPSI2OS41NTQiIHkyPSIyNC4yNDkiLz4NCjwvc3ZnPg0KCg==" alt="" style="width:min(100%,250px);height:auto;display:block;margin:10px auto;">В треугольнике <i>ABC</i> угол <i>A</i> равен 60°, угол <i>B</i> равен 45°, <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnPz4KPCEtLS0xLjgtLT4KPHN2ZyB2ZXJzaW9uPScxLjEnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZycgeG1sbnM6eGxpbms9J2h0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsnIHdpZHRoPSc1MS41cHQnIGhlaWdodD0nMTIuMHB0JyB2aWV3Qm94PScyMTAuOSA3Mi4yIDUxLjUgMTIuMCc+CjxkZWZzPgo8cGF0aCBpZD0nZzctNTgnIGQ9J00yLjEtLjZDMi4xLS45IDEuOC0xLjIgMS41LTEuMlMuOS0uOSAuOS0uNlMxLjIgMCAxLjUgMFMyLjEtLjMgMi4xLS42WicvPgo8dXNlIGlkPSdnMTEtNTMnIHhsaW5rOmhyZWY9JyNnMy01MycvPgo8dXNlIGlkPSdnMTEtNTQnIHhsaW5rOmhyZWY9JyNnMy01NCcvPgo8cGF0aCBpZD0nZzMtNTMnIGQ9J00yLTYuM0g0LjFDNC4zLTYuMyA0LjMtNi40IDQuMy02LjRMNC44LTcuNEw0LjctNy41QzQuNS03LjIgNC40LTcuMiA0LjItNy4ySDEuOUwuNy00LjZDLjctNC42IC43LTQuNiAuNy00LjZDLjctNC41IC43LTQuNSAuOC00LjVDMS4yLTQuNSAxLjYtNC40IDIuMS00LjNDMy4zLTMuOSAzLjktMy4yIDMuOS0yLjFDMy45LTEuMSAzLjItLjIgMi40LS4yQzIuMi0uMiAyLS4zIDEuNi0uNkMxLjMtLjggMS0uOSAuOC0uOUMuNS0uOSAuMy0uOCAuMy0uNUMuMy0uMSAuOSAuMiAxLjcgLjJDMi42IC4yIDMuNC0uMSAzLjktLjdDNC40LTEuMiA0LjYtMS44IDQuNi0yLjZDNC42LTMuNCA0LjQtMy45IDMuOS00LjVDMy40LTQuOSAyLjgtNS4yIDEuNS01LjRMMi02LjNaJy8+CjxwYXRoIGlkPSdnMy01NCcgZD0nTTQuOC03LjRDMy42LTcuMyAzLTcuMSAyLjItNi42QzEtNS43IC40LTQuNSAuNC0zQy40LTIuMSAuNy0xLjEgMS4xLS42QzEuNS0uMSAyLjEgLjIgMi44IC4yQzQuMiAuMiA1LjEtLjkgNS4xLTIuNEM1LjEtMy44IDQuMy00LjcgMy00LjdDMi42LTQuNyAyLjMtNC42IDEuNy00LjJDMS45LTUuOCAzLjItNyA0LjktNy4zTDQuOC03LjRaTTIuNi00LjJDMy42LTQuMiA0LjEtMy40IDQuMS0yQzQuMS0uOCAzLjctLjIgMi45LS4yQzItLjIgMS40LTEuMiAxLjQtMi45QzEuNC0zLjQgMS41LTMuNyAxLjctMy45QzEuOS00LjEgMi4yLTQuMiAyLjYtNC4yWicvPgo8cGF0aCBpZD0nZzgtNjYnIGQ9J00tLjEgMEgzQzQuNyAwIDUuOS0uOSA1LjktMi4yQzUuOS0yLjYgNS43LTMgNS41LTMuMkM1LjMtMy40IDUuMS0zLjYgNC41LTMuOEM1LjMtNCA1LjYtNC4xIDUuOS00LjRDNi4yLTQuNyA2LjQtNS4xIDYuNC01LjVDNi40LTYuNSA1LjYtNy4xIDQuMi03LjFIMS40Vi02LjlDMi4xLTYuOSAyLjItNi44IDIuMi02LjVDMi4yLTYuMyAyLjItNiAyLjEtNS44TC44LTFDLjYtLjMgLjUtLjMtLjEtLjJWMFpNMi42LTMuNkMzLjMtMy42IDMuNy0zLjYgNC0zLjVDNC40LTMuMyA0LjctMi44IDQuNy0yLjJDNC43LTEgMy45LS4zIDIuNi0uM0MyLjEtLjMgMS45LS41IDEuOS0uOEMxLjktLjkgMi0xLjQgMi4yLTIuM0MyLjQtMi44IDIuNC0zIDIuNi0zLjZaTTMuNC02LjVDMy41LTYuNyAzLjYtNi44IDQtNi44QzQuOS02LjggNS4zLTYuNCA1LjMtNS42QzUuMy01IDUtNC41IDQuNi00LjJDNC4yLTQgMy43LTMuOSAyLjctMy45TDMuNC02LjVaJy8+CjxwYXRoIGlkPSdnOC02NycgZD0nTTcuMS01LjFMNy41LTcuMkg3LjNDNy4yLTcgNy4xLTcgNi44LTdDNi44LTcgNi42LTcgNi40LTcuMUM1LjktNy4yIDUuNS03LjIgNS4xLTcuMkMyLjgtNy4yIC43LTUuMSAuNy0yLjZDLjctMSAxLjkgLjIgMy42IC4yQzQuNyAuMiA1LjUtLjMgNi41LTEuNEw2LjMtMS42QzUuNC0uNiA0LjctLjMgMy44LS4zQzIuNi0uMyAxLjktMS4xIDEuOS0yLjVDMS45LTMuOCAyLjUtNS4xIDMuMy02QzMuOC02LjUgNC41LTYuOCA1LjItNi44QzYuMi02LjggNi44LTYuMyA2LjktNS4xTDcuMS01LjFaJy8+CjxwYXRoIGlkPSdnMTItNjEnIGQ9J003LjUtMy42QzcuNi0zLjYgNy44LTMuNiA3LjgtMy44UzcuNi00IDcuNS00SDFDLjgtNCAuNi00IC42LTMuOFMuOC0zLjYgMS0zLjZINy41Wk03LjUtMS40QzcuNi0xLjQgNy44LTEuNCA3LjgtMS43UzcuNi0xLjkgNy41LTEuOUgxQy44LTEuOSAuNi0xLjkgLjYtMS43Uy44LTEuNCAxLTEuNEg3LjVaJy8+CjxwYXRoIGlkPSdnMS0wJyBkPSdNNy4yLTIuNUM3LjMtMi41IDcuNS0yLjUgNy41LTIuN1M3LjMtMi45IDcuMi0yLjlIMS4zQzEuMS0yLjkgLjktMi45IC45LTIuN1MxLjEtMi41IDEuMy0yLjVINy4yWicvPgo8cGF0aCBpZD0nZzEtMTEyJyBkPSdNNC4yIDkuM0wyLjMgNS4xQzIuMiA0LjkgMi4yIDQuOSAyLjIgNC45QzIuMSA0LjkgMi4xIDQuOSAyIDVMLjkgNS44Qy44IDUuOSAuOCA1LjkgLjggNS45Qy44IDYgLjggNi4xIC45IDYuMUMxIDYuMSAxLjIgNS45IDEuMyA1LjhDMS4zIDUuOCAxLjUgNS42IDEuNiA1LjZMMy44IDEwLjNDMy44IDEwLjQgMy45IDEwLjQgNCAxMC40QzQuMiAxMC40IDQuMiAxMC40IDQuMyAxMC4yTDkuMiAwQzkuMy0uMiA5LjMtLjIgOS4zLS4yQzkuMy0uMyA5LjItLjQgOS4xLS40QzktLjQgOC45LS40IDguOC0uMkw0LjIgOS4zWicvPgo8L2RlZnM+CjxnIGlkPSdwYWdlMSc+Cgo8dXNlIHg9JzIxMi40JyB5PSc4Mi4zJyB4bGluazpocmVmPScjZzgtNjYnLz4KPHVzZSB4PScyMTguNScgeT0nODIuMycgeGxpbms6aHJlZj0nI2c4LTY3Jy8+Cjx1c2UgeD0nMjI4LjQnIHk9JzgyLjMnIHhsaW5rOmhyZWY9JyNnMTItNjEnLz4KPHVzZSB4PScyMzkuMycgeT0nODIuMycgeGxpbms6aHJlZj0nI2cxMS01MycvPgo8dXNlIHg9JzI0NC44JyB5PSc3Mi42JyB4bGluazpocmVmPScjZzEtMTEyJy8+CjxyZWN0IHg9JzI1My45JyB5PSc3Mi4yJyBoZWlnaHQ9Jy40JyB3aWR0aD0nNS41Jy8+Cjx1c2UgeD0nMjUzLjknIHk9JzgyLjMnIHhsaW5rOmhyZWY9JyNnMTEtNTQnLz4KPHVzZSB4PScyNTkuMycgeT0nODIuMycgeGxpbms6aHJlZj0nI2c3LTU4Jy8+CjwvZz4KPC9zdmc+" alt="" style="max-width:100%;height:auto;display:block;margin:10px auto;"> Найдите <i>AC</i>.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_3" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_3"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">4</div>
+  <div class="task-q"><p><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9ItCh0LvQvtC5XzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTAxLjg5NXB4IiBoZWlnaHQ9Ijk3Ljk3MXB4IiB2aWV3Qm94PSIwIDAgMTAxLjg5NSA5Ny45NzEiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDEwMS44OTUgOTcuOTcxIg0KCSB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxwb2x5Z29uIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgcG9pbnRzPSINCgkxMi4wMDIsNzMuNDI4IDkxLjkxOSw3My40MjggMzAuNzYsMTIuNjY4ICIvPg0KPHBhdGggZD0iTTguNTU4LDc1LjAwOGwtMC43NjQsOC40N2MtMC4wNCwwLjM5Ni0wLjA2LDAuNjU2LTAuMDYsMC43ODFjMCwwLjIsMC4wMzcsMC4zNTQsMC4xMTEsMC40NTgNCgljMC4wOTQsMC4xNDYsMC4yMjEsMC4yNTMsMC4zODIsMC4zMjNjMC4xNiwwLjA3LDAuNDMxLDAuMTA0LDAuODEyLDAuMTA0bC0wLjA4MiwwLjI3OEg1LjAwMmwwLjA4MS0wLjI3OGgwLjE3MQ0KCWMwLjMyLDAsMC41ODItMC4wNjksMC43ODUtMC4yMWMwLjE0My0wLjA5NSwwLjI1NC0wLjI1MywwLjMzMy0wLjQ3M2MwLjA1NS0wLjE1NSwwLjEwNi0wLjUyMSwwLjE1Ni0xLjA5N2wwLjExOC0xLjI5MkgzLjc3MQ0KCWwtMS4wMjIsMS40MDRjLTAuMjMyLDAuMzE1LTAuMzc4LDAuNTQyLTAuNDM4LDAuNjhjLTAuMDU5LDAuMTM4LTAuMDg5LDAuMjY3LTAuMDg5LDAuMzg3YzAsMC4xNiwwLjA2NCwwLjI5OCwwLjE5MywwLjQxMw0KCWMwLjEyOCwwLjExNSwwLjM0MSwwLjE3OCwwLjYzNywwLjE4OGwtMC4wODEsMC4yNzhIMGwwLjA4MS0wLjI3OGMwLjM2Ni0wLjAxNSwwLjY4OC0wLjEzOSwwLjk2OC0wLjM3MQ0KCWMwLjI3OC0wLjIzMywwLjY5NS0wLjcyOSwxLjI0OC0xLjQ5MWw2LjAwMi04LjI3NEg4LjU1OHogTTcuMDkxLDc3LjUwOGwtMi45MTIsNC4wMThoMi41MjdMNy4wOTEsNzcuNTA4eiIvPg0KPHBhdGggZD0iTTIzLjQ3MywwLjI3OEwyMy41NzcsMGgzLjU4NmMwLjYwMywwLDEuMTQsMC4wOTUsMS42MTIsMC4yODVjMC40NzIsMC4xOSwwLjgyNCwwLjQ1NSwxLjA2LDAuNzk2DQoJYzAuMjM0LDAuMzQxLDAuMzUyLDAuNzAxLDAuMzUyLDEuMDgxYzAsMC41ODYtMC4yMDksMS4xMTUtMC42MjYsMS41ODljLTAuNDE4LDAuNDczLTEuMDk4LDAuODIyLTIuMDQxLDEuMDQ3DQoJYzAuNjA3LDAuMjMsMS4wNTQsMC41MzYsMS4zNDEsMC45MTZjMC4yODYsMC4zODEsMC40MywwLjc5OSwwLjQzLDEuMjU1YzAsMC41MDYtMC4xMjksMC45ODgtMC4zODYsMS40NDlzLTAuNTg2LDAuODE4LTAuOTg5LDEuMDc0DQoJYy0wLjQwMiwwLjI1NS0wLjg4OCwwLjQ0Mi0xLjQ1NSwwLjU2M2MtMC40MDUsMC4wODYtMS4wMzgsMC4xMjgtMS44OTcsMC4xMjhIMjAuODhsMC4wOTctMC4yNzhjMC4zODUtMC4wMSwwLjY0Ni0wLjA0NywwLjc4NS0wLjExMg0KCWMwLjE5Ny0wLjA4NSwwLjMzOC0wLjE5NywwLjQyMy0wLjMzOGMwLjExOC0wLjE5LDAuMjc2LTAuNjI2LDAuNDc0LTEuMzA3bDEuODAxLTYuMTY1YzAuMTUzLTAuNTIxLDAuMjI5LTAuODg3LDAuMjI5LTEuMDk3DQoJYzAtMC4xODYtMC4wNjctMC4zMzItMC4yMDQtMC40MzljLTAuMTM2LTAuMTA3LTAuMzk0LTAuMTYxLTAuNzczLTAuMTYxQzIzLjYyNiwwLjI4NSwyMy41NDgsMC4yODIsMjMuNDczLDAuMjc4eiBNMjMuNTE3LDkuNTIyDQoJYzAuNTM0LDAuMDcsMC45NTEsMC4xMDUsMS4yNTMsMC4xMDVjMC43NzEsMCwxLjQ1My0wLjIzNSwyLjA0OS0wLjcwNmMwLjU5NS0wLjQ3MSwwLjg5My0xLjEwOCwwLjg5My0xLjkxNQ0KCWMwLTAuNjE1LTAuMTg1LTEuMDk3LTAuNTUyLTEuNDQxYy0wLjM2OC0wLjM0Ni0wLjk2My0wLjUxOS0xLjc4Mi0wLjUxOWMtMC4xNTgsMC0wLjM1MSwwLjAwOC0wLjU3OCwwLjAyMkwyMy41MTcsOS41MjJ6DQoJIE0yNC45NzcsNC41MDVjMC4zMjEsMC4wMTEsMC41NTMsMC4wMTYsMC42OTYsMC4wMTZjMS4wMjcsMCwxLjc5Mi0wLjIyNywyLjI5NC0wLjY4YzAuNTAxLTAuNDUzLDAuNzUyLTEuMDIxLDAuNzUyLTEuNzAxDQoJYzAtMC41MTYtMC4xNTMtMC45MTctMC40Ni0xLjIwNWMtMC4zMDYtMC4yODgtMC43OTUtMC40MzItMS40NjctMC40MzJjLTAuMTc4LDAtMC40MDUsMC4wMy0wLjY4MiwwLjA5TDI0Ljk3Nyw0LjUwNXoiLz4NCjxwYXRoIGQ9Ik0xMDEuODk0LDc0LjE5M2wtMC43NDksMy4yOTdoLTAuMjY3bC0wLjAyOS0wLjgyNmMtMC4wMjQtMC4zLTAuMDgxLTAuNTY4LTAuMTcxLTAuODA0DQoJYy0wLjA4OS0wLjIzNS0wLjIyMi0wLjQzOC0wLjM5OS0wLjYxMXMtMC40MDMtMC4zMDktMC42NzUtMC40MDZzLTAuNTczLTAuMTQ2LTAuOTAzLTAuMTQ2Yy0wLjg4NSwwLTEuNjU4LDAuMjQ2LTIuMzE5LDAuNzM2DQoJYy0wLjg0NSwwLjYyNi0xLjUwNywxLjUxLTEuOTg2LDIuNjVjLTAuMzk1LDAuOTQxLTAuNTkzLDEuODk2LTAuNTkzLDIuODYxYzAsMC45ODYsMC4yODQsMS43NzQsMC44NTMsMi4zNjINCgljMC41NjcsMC41ODgsMS4zMDcsMC44ODIsMi4yMTUsMC44ODJjMC42ODgsMCwxLjI5OC0wLjE1NCwxLjgzNC0wLjQ2NXMxLjAzNC0wLjc4OSwxLjQ5My0xLjQzNWgwLjM0OQ0KCWMtMC41NDQsMC44NzYtMS4xNDYsMS41MjEtMS44MDgsMS45MzRjLTAuNjYyLDAuNDEzLTEuNDU1LDAuNjE5LTIuMzc5LDAuNjE5Yy0wLjgyLDAtMS41NDYtMC4xNzQtMi4xNzktMC41MjENCgljLTAuNjMyLTAuMzQ4LTEuMTEzLTAuODM3LTEuNDQ0LTEuNDY4cy0wLjQ5Ny0xLjMxLTAuNDk3LTIuMDM1YzAtMS4xMTIsMC4yOTQtMi4xOTMsMC44ODItMy4yNDQNCgljMC41ODgtMS4wNTIsMS4zOTUtMS44NzgsMi40Mi0yLjQ3OWMxLjAyNC0wLjYwMSwyLjA1OS0wLjkwMSwzLjEwMS0wLjkwMWMwLjQ4OSwwLDEuMDM3LDAuMTE4LDEuNjQ1LDAuMzU0DQoJYzAuMjY3LDAuMSwwLjQ2LDAuMTQ5LDAuNTc4LDAuMTQ5YzAuMTE5LDAsMC4yMjMtMC4wMjQsMC4zMTItMC4wNzRjMC4wODktMC4wNTEsMC4yMzctMC4xOTMsMC40NDQtMC40MjlIMTAxLjg5NEwxMDEuODk0LDc0LjE5M3oiDQoJLz4NCjxjaXJjbGUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjQ0M3NjFGIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgY3g9IjUxLjk2IiBjeT0iNTIuNDkiIHI9IjQ1LjEwNiIvPg0KPC9zdmc+DQoK" alt="" style="width:min(100%,250px);height:auto;display:block;margin:10px auto;">В треугольнике <i>ABC</i> угол <i>C</i> равен 45°, <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnPz4KPCEtLS0xLjgtLT4KPHN2ZyB2ZXJzaW9uPScxLjEnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZycgeG1sbnM6eGxpbms9J2h0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsnIHdpZHRoPSc1MS4xcHQnIGhlaWdodD0nMTIuMHB0JyB2aWV3Qm94PScyMTEuMSA3Mi4yIDUxLjEgMTIuMCc+CjxkZWZzPgo8dXNlIGlkPSdnMTEtNTAnIHhsaW5rOmhyZWY9JyNnMy01MCcvPgo8dXNlIGlkPSdnMTEtNTQnIHhsaW5rOmhyZWY9JyNnMy01NCcvPgo8cGF0aCBpZD0nZzMtNTAnIGQ9J001LjItMS41TDUtMS41QzQuNi0uOSA0LjUtLjggNC0uOEgxLjRMMy4yLTIuN0M0LjItMy43IDQuNi00LjYgNC42LTUuNEM0LjYtNi41IDMuNy03LjMgMi42LTcuM0MyLTcuMyAxLjQtNy4xIDEtNi43Qy43LTYuMyAuNS02IC4zLTUuMkwuNi01LjFDMS02LjIgMS40LTYuNSAyLjEtNi41QzMuMS02LjUgMy43LTUuOSAzLjctNUMzLjctNC4yIDMuMi0zLjIgMi4zLTIuMkwuMy0uMVYwSDQuNkw1LjItMS41WicvPgo8cGF0aCBpZD0nZzMtNTQnIGQ9J000LjgtNy40QzMuNi03LjMgMy03LjEgMi4yLTYuNkMxLTUuNyAuNC00LjUgLjQtM0MuNC0yLjEgLjctMS4xIDEuMS0uNkMxLjUtLjEgMi4xIC4yIDIuOCAuMkM0LjIgLjIgNS4xLS45IDUuMS0yLjRDNS4xLTMuOCA0LjMtNC43IDMtNC43QzIuNi00LjcgMi4zLTQuNiAxLjctNC4yQzEuOS01LjggMy4yLTcgNC45LTcuM0w0LjgtNy40Wk0yLjYtNC4yQzMuNi00LjIgNC4xLTMuNCA0LjEtMkM0LjEtLjggMy43LS4yIDIuOS0uMkMyLS4yIDEuNC0xLjIgMS40LTIuOUMxLjQtMy40IDEuNS0zLjcgMS43LTMuOUMxLjktNC4xIDIuMi00LjIgMi42LTQuMlonLz4KPHBhdGggaWQ9J2c3LTU4JyBkPSdNMi4xLS42QzIuMS0uOSAxLjgtMS4yIDEuNS0xLjJTLjktLjkgLjktLjZTMS4yIDAgMS41IDBTMi4xLS4zIDIuMS0uNlonLz4KPHBhdGggaWQ9J2cxMi02MScgZD0nTTcuNS0zLjZDNy42LTMuNiA3LjgtMy42IDcuOC0zLjhTNy42LTQgNy41LTRIMUMuOC00IC42LTQgLjYtMy44Uy44LTMuNiAxLTMuNkg3LjVaTTcuNS0xLjRDNy42LTEuNCA3LjgtMS40IDcuOC0xLjdTNy42LTEuOSA3LjUtMS45SDFDLjgtMS45IC42LTEuOSAuNi0xLjdTLjgtMS40IDEtMS40SDcuNVonLz4KPHBhdGggaWQ9J2c4LTY1JyBkPSdNNi4xLS4yQzUuNS0uMiA1LjQtLjMgNS4zLTEuMUw0LjMtNy4zSDRMLjgtMS44QzAtLjQtLjEtLjMtLjYtLjJWMEgxLjVWLS4yQy45LS4yIC44LS4zIC44LS42Qy44LS44IC45LS45IDEuMS0xLjJMMS43LTIuNUg0LjFMNC4zLTFDNC4zLS45IDQuMy0uOCA0LjMtLjdDNC4zLS4zIDQuMi0uMiAzLjUtLjJWMEg2LjFWLS4yWk0xLjktMi44TDMuNS01LjdMNC0yLjhIMS45WicvPgo8cGF0aCBpZD0nZzgtNjYnIGQ9J00tLjEgMEgzQzQuNyAwIDUuOS0uOSA1LjktMi4yQzUuOS0yLjYgNS43LTMgNS41LTMuMkM1LjMtMy40IDUuMS0zLjYgNC41LTMuOEM1LjMtNCA1LjYtNC4xIDUuOS00LjRDNi4yLTQuNyA2LjQtNS4xIDYuNC01LjVDNi40LTYuNSA1LjYtNy4xIDQuMi03LjFIMS40Vi02LjlDMi4xLTYuOSAyLjItNi44IDIuMi02LjVDMi4yLTYuMyAyLjItNiAyLjEtNS44TC44LTFDLjYtLjMgLjUtLjMtLjEtLjJWMFpNMi42LTMuNkMzLjMtMy42IDMuNy0zLjYgNC0zLjVDNC40LTMuMyA0LjctMi44IDQuNy0yLjJDNC43LTEgMy45LS4zIDIuNi0uM0MyLjEtLjMgMS45LS41IDEuOS0uOEMxLjktLjkgMi0xLjQgMi4yLTIuM0MyLjQtMi44IDIuNC0zIDIuNi0zLjZaTTMuNC02LjVDMy41LTYuNyAzLjYtNi44IDQtNi44QzQuOS02LjggNS4zLTYuNCA1LjMtNS42QzUuMy01IDUtNC41IDQuNi00LjJDNC4yLTQgMy43LTMuOSAyLjctMy45TDMuNC02LjVaJy8+CjxwYXRoIGlkPSdnMS0wJyBkPSdNNy4yLTIuNUM3LjMtMi41IDcuNS0yLjUgNy41LTIuN1M3LjMtMi45IDcuMi0yLjlIMS4zQzEuMS0yLjkgLjktMi45IC45LTIuN1MxLjEtMi41IDEuMy0yLjVINy4yWicvPgo8cGF0aCBpZD0nZzEtMTEyJyBkPSdNNC4yIDkuM0wyLjMgNS4xQzIuMiA0LjkgMi4yIDQuOSAyLjIgNC45QzIuMSA0LjkgMi4xIDQuOSAyIDVMLjkgNS44Qy44IDUuOSAuOCA1LjkgLjggNS45Qy44IDYgLjggNi4xIC45IDYuMUMxIDYuMSAxLjIgNS45IDEuMyA1LjhDMS4zIDUuOCAxLjUgNS42IDEuNiA1LjZMMy44IDEwLjNDMy44IDEwLjQgMy45IDEwLjQgNCAxMC40QzQuMiAxMC40IDQuMiAxMC40IDQuMyAxMC4yTDkuMiAwQzkuMy0uMiA5LjMtLjIgOS4zLS4yQzkuMy0uMyA5LjItLjQgOS4xLS40QzktLjQgOC45LS40IDguOC0uMkw0LjIgOS4zWicvPgo8L2RlZnM+CjxnIGlkPSdwYWdlMSc+Cgo8dXNlIHg9JzIxMi41JyB5PSc4Mi4zJyB4bGluazpocmVmPScjZzgtNjUnLz4KPHVzZSB4PScyMTkuMicgeT0nODIuMycgeGxpbms6aHJlZj0nI2c4LTY2Jy8+Cjx1c2UgeD0nMjI4LjMnIHk9JzgyLjMnIHhsaW5rOmhyZWY9JyNnMTItNjEnLz4KPHVzZSB4PScyMzkuMicgeT0nODIuMycgeGxpbms6aHJlZj0nI2cxMS01NCcvPgo8dXNlIHg9JzI0NC42JyB5PSc3Mi42JyB4bGluazpocmVmPScjZzEtMTEyJy8+CjxyZWN0IHg9JzI1My43JyB5PSc3Mi4yJyBoZWlnaHQ9Jy40JyB3aWR0aD0nNS41Jy8+Cjx1c2UgeD0nMjUzLjcnIHk9JzgyLjMnIHhsaW5rOmhyZWY9JyNnMTEtNTAnLz4KPHVzZSB4PScyNTkuMicgeT0nODIuMycgeGxpbms6aHJlZj0nI2c3LTU4Jy8+CjwvZz4KPC9zdmc+" alt="" style="max-width:100%;height:auto;display:block;margin:10px auto;"> Найдите радиус окружности, описанной около этого треугольника.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_4" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_4"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">5</div>
+  <div class="task-q"><p>Боковая сторона равнобедренного треугольника равна 4. Угол при вершине, противолежащий основанию, равен 120°. Найдите диаметр окружности, описанной около этого треугольника.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_5" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_5"></span>
+  </div>
+</div><div class="task">
+  <div class="task-num">6</div>
+  <div class="task-q"><p><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9ItCh0LvQvtC5XzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTMzLjY2MXB4IiBoZWlnaHQ9IjEzNi44NzdweCIgdmlld0JveD0iMCAwIDEzMy42NjEgMTM2Ljg3NyIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTMzLjY2MSAxMzYuODc3Ig0KCSB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxnPg0KCTxnPg0KCQk8Zz4NCgkJCTxnPg0KCQkJCTxnPg0KCQkJCQk8ZGVmcz4NCgkJCQkJCTxyZWN0IGlkPSJTVkdJRF8xXyIgeD0iMC4wNzgiIHk9IjEwOC42MTYiIHdpZHRoPSIxNC4yNDgiIGhlaWdodD0iMTUuNDciLz4NCgkJCQkJPC9kZWZzPg0KCQkJCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzJfIj4NCgkJCQkJCTx1c2UgeGxpbms6aHJlZj0iI1NWR0lEXzFfIiAgb3ZlcmZsb3c9InZpc2libGUiLz4NCgkJCQkJPC9jbGlwUGF0aD4NCgkJCQkJPGcgY2xpcC1wYXRoPSJ1cmwoI1NWR0lEXzJfKSI+DQoJCQkJCQk8ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3ICAgICI+DQoJCQkJCQkJPHBhdGggZmlsbD0iIzBEMEYwRiIgZD0iTTEwLjkxLDExMS45MDNsLTAuNzE3LDcuODExYy0wLjAzNywwLjM2NS0wLjA1NiwwLjYwNS0wLjA1NiwwLjcyMWMwLDAuMTg4LDAuMDM1LDAuMzI1LDAuMTA0LDAuNDIyDQoJCQkJCQkJCWMwLjA4OCwwLjEzOCwwLjIwOCwwLjIzMywwLjM1OCwwLjMwMmMwLjE1MSwwLjA2MywwLjQwNSwwLjA5NiwwLjc2MiwwLjA5NmwtMC4wNzcsMC4yNTdINy41N2wwLjA3Ny0wLjI1N2gwLjE2DQoJCQkJCQkJCWMwLjMwMSwwLDAuNTQ3LTAuMDYzLDAuNzM3LTAuMTljMC4xMzQtMC4wODgsMC4yMzktMC4yMzIsMC4zMTMtMC40MzhjMC4wNTEtMC4xNDYsMC4xLTAuNDc5LDAuMTQ2LTEuMDE1bDAuMTExLTEuMTg4SDYuNDE1DQoJCQkJCQkJCWwtMC45NiwxLjI5NWMtMC4yMTgsMC4yOTEtMC4zNTQsMC41LTAuNDEsMC42MjdjLTAuMDU2LDAuMTI4LTAuMDgzLDAuMjQ2LTAuMDgzLDAuMzU3YzAsMC4xNDYsMC4wNiwwLjI3MSwwLjE4MSwwLjM4MQ0KCQkJCQkJCQljMC4xMjEsMC4xMDQsMC4zMiwwLjE2MywwLjU5OSwwLjE3MmwtMC4wNzcsMC4yNTdoLTIuNzlsMC4wNzctMC4yNTdjMC4zNDMtMC4wMTcsMC42NDYtMC4xMjcsMC45MDgtMC4zNDINCgkJCQkJCQkJYzAuMjYyLTAuMjE4LDAuNjUzLTAuNjc1LDEuMTcyLTEuMzc1bDUuNjM2LTcuNjM0SDEwLjkxTDEwLjkxLDExMS45MDN6IE05LjUzMiwxMTQuMjFsLTIuNzM0LDMuNzA0SDkuMTdMOS41MzIsMTE0LjIxeiIvPg0KCQkJCQkJPC9nPg0KCQkJCQk8L2c+DQoJCQkJPC9nPg0KCQkJPC9nPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPGc+DQoJPGc+DQoJCTxnPg0KCQkJPGc+DQoJCQkJPGc+DQoJCQkJCTxkZWZzPg0KCQkJCQkJPHJlY3QgaWQ9IlNWR0lEXzNfIiB4PSIxMTkuMDA4IiB5PSIxMDguNjE2IiB3aWR0aD0iMTQuMjQ4IiBoZWlnaHQ9IjE1LjQ3Ii8+DQoJCQkJCTwvZGVmcz4NCgkJCQkJPGNsaXBQYXRoIGlkPSJTVkdJRF80XyI+DQoJCQkJCQk8dXNlIHhsaW5rOmhyZWY9IiNTVkdJRF8zXyIgIG92ZXJmbG93PSJ2aXNpYmxlIi8+DQoJCQkJCTwvY2xpcFBhdGg+DQoJCQkJCTxnIGNsaXAtcGF0aD0idXJsKCNTVkdJRF80XykiPg0KCQkJCQkJPGcgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAgICAiPg0KCQkJCQkJCTxwYXRoIGZpbGw9IiMwRDBGMEYiIGQ9Ik0xMjMuOTE3LDExMi4zNzVsMC4xLTAuMjU3aDMuMzY1YzAuNTY0LDAsMS4wNywwLjA4OCwxLjUxNSwwLjI2NHMwLjc3MiwwLjQyLDAuOTk2LDAuNzM0DQoJCQkJCQkJCWMwLjIyLDAuMzEzLDAuMzMsMC42NDYsMC4zMywwLjk5NmMwLDAuNTQxLTAuMTk2LDEuMDI5LTAuNTkxLDEuNDY1Yy0wLjM5MywwLjQzOC0xLjAyOCwwLjc1OC0xLjkxNiwwLjk2Ng0KCQkJCQkJCQljMC41NywwLjIxMiwwLjk5LDAuNDk0LDEuMjYxLDAuODQ1YzAuMjcxLDAuMzU0LDAuNDAxLDAuNzM2LDAuNDAxLDEuMTU2YzAsMC40NjctMC4xMjEsMC45MTItMC4zNTgsMS4zMzcNCgkJCQkJCQkJYy0wLjI0MiwwLjQyNS0wLjU1NCwwLjc1NS0wLjkzMywwLjk4OWMtMC4zNzcsMC4yMzYtMC44MzQsMC40MDgtMS4zNjQsMC41MmMtMC4zODIsMC4wNzktMC45NzYsMC4xMTgtMS43ODEsMC4xMThoLTMuNDU3DQoJCQkJCQkJCWwwLjA5MS0wLjI1N2MwLjM2LTAuMDA5LDAuNjA2LTAuMDQzLDAuNzM3LTAuMTA0YzAuMTg4LTAuMDc4LDAuMzEzLTAuMTg1LDAuMzk2LTAuMzEzYzAuMTEtMC4xNzUsMC4yNi0wLjU3NywwLjQ0NC0xLjIwNA0KCQkJCQkJCQlsMS42ODgtNS42ODhjMC4xNDYtMC40NzksMC4yMTgtMC44MTQsMC4yMTgtMS4wMWMwLTAuMTczLTAuMDYzLTAuMzA4LTAuMTktMC40MDZjLTAuMTI5LTAuMTAxLTAuMzY5LTAuMTQ2LTAuNzI5LTAuMTQ2DQoJCQkJCQkJCUMxMjQuMDU5LDExMi4zODIsMTIzLjk4NSwxMTIuMzgsMTIzLjkxNywxMTIuMzc1eiBNMTIzLjk1OCwxMjAuODk3YzAuNTAyLDAuMDYzLDAuODk2LDAuMDk4LDEuMTc2LDAuMDk4DQoJCQkJCQkJCWMwLjcyNywwLDEuMzY1LTAuMjE3LDEuOTI3LTAuNjVjMC41NjItMC40MzMsMC44MzgtMS4wMjEsMC44MzgtMS43NjZjMC0wLjU2OC0wLjE3Mi0xLjAxMi0wLjUyMS0xLjMzDQoJCQkJCQkJCWMtMC4zNDYtMC4zMTgtMC45MDEtMC40NzktMS42NzQtMC40NzljLTAuMTQ2LDAtMC4zMjgsMC4wMDgtMC41NDMsMC4wMjFMMTIzLjk1OCwxMjAuODk3eiBNMTI1LjMyOSwxMTYuMjcyDQoJCQkJCQkJCWMwLjMwMSwwLjAxLDAuNTIxLDAuMDE1LDAuNjUzLDAuMDE1YzAuOTY1LDAsMS42ODMtMC4yMDksMi4xNTMtMC42MjdjMC40NzEtMC40MTcsMC43MDctMC45NCwwLjcwNy0xLjU2OA0KCQkJCQkJCQljMC0wLjQ3Ni0wLjE0Ni0wLjg0Ni0wLjQzMi0xLjExYy0wLjI4OS0wLjI2Ni0wLjc0OC0wLjM5Ni0xLjM4LTAuMzk2Yy0wLjE2NSwwLTAuMzgxLDAuMDI0LTAuNjQxLDAuMDgyTDEyNS4zMjksMTE2LjI3MnoiLz4NCgkJCQkJCTwvZz4NCgkJCQkJPC9nPg0KCQkJCTwvZz4NCgkJCTwvZz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8Zz4NCgkJCTxnPg0KCQkJCTxnPg0KCQkJCQk8ZGVmcz4NCgkJCQkJCTxyZWN0IGlkPSJTVkdJRF81XyIgeD0iNTkuMjgzIiB3aWR0aD0iMTUuNTQ5IiBoZWlnaHQ9IjE2Ljc3MSIvPg0KCQkJCQk8L2RlZnM+DQoJCQkJCTxjbGlwUGF0aCBpZD0iU1ZHSURfNl8iPg0KCQkJCQkJPHVzZSB4bGluazpocmVmPSIjU1ZHSURfNV8iICBvdmVyZmxvdz0idmlzaWJsZSIvPg0KCQkJCQk8L2NsaXBQYXRoPg0KCQkJCQk8ZyBjbGlwLXBhdGg9InVybCgjU1ZHSURfNl8pIj4NCgkJCQkJCTxnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgICAgIj4NCgkJCQkJCQk8cGF0aCBmaWxsPSIjMEQwRjBGIiBkPSJNNzEuMjU0LDMuMjg2bC0wLjcwMywzLjA0MmgtMC4yNWwtMC4wMjctMC43NjJjLTAuMDIzLTAuMjc3LTAuMDc3LTAuNTI0LTAuMTYtMC43NDENCgkJCQkJCQkJQzcwLjAzLDQuNjA4LDY5LjkwNSw0LjQyLDY5LjczNyw0LjI2Yy0wLjE2Ni0wLjE1OS0wLjM3Ny0wLjI4NC0wLjYzMy0wLjM3NGMtMC4yNTUtMC4wOS0wLjUzOC0wLjEzNS0wLjg1LTAuMTM1DQoJCQkJCQkJCWMtMC44MywwLTEuNTU5LDAuMjI3LTIuMTc4LDAuNjc5Yy0wLjc5MywwLjU3Ny0xLjQxNSwxLjM5My0xLjg2NSwyLjQ0NmMtMC4zNzEsMC44NjktMC41NTcsMS43NDktMC41NTcsMi42NA0KCQkJCQkJCQljMCwwLjkxLDAuMjY3LDEuNjM3LDAuOCwyLjE3OWMwLjUzMywwLjU0MywxLjIyNywwLjgxNCwyLjA4MSwwLjgxNGMwLjY0NSwwLDEuMjE3LTAuMTQzLDEuNzIxLTAuNDI5DQoJCQkJCQkJCWMwLjUwNS0wLjI4NywwLjk3Mi0wLjcyOCwxLjQwMi0xLjMyNGgwLjMyNmMtMC41MTIsMC44MDktMS4wNzQsMS40MDMtMS42OTcsMS43ODRjLTAuNjIxLDAuMzgxLTEuMzY4LDAuNTcyLTIuMjMzLDAuNTcyDQoJCQkJCQkJCWMtMC43NywwLTEuNDUyLTAuMTYxLTIuMDQ2LTAuNDgxYy0wLjU5NC0wLjMyMS0xLjA0Ni0wLjc3Mi0xLjM1Ny0xLjM1NHMtMC40NjYtMS4yMDgtMC40NjYtMS44NzgNCgkJCQkJCQkJYzAtMS4wMjUsMC4yNzYtMi4wMjMsMC44MjgtMi45OTNjMC41NTItMC45NywxLjMxLTEuNzMyLDIuMjcyLTIuMjg3YzAuOTYyLTAuNTU1LDEuOTM1LTAuODMzLDIuOTE1LTAuODMzDQoJCQkJCQkJCWMwLjQ1OSwwLDAuOTc1LDAuMTA5LDEuNTQ1LDAuMzI2YzAuMjUsMC4wOTMsMC40MzQsMC4xMzksMC41NDMsMC4xMzljMC4xMTEsMCwwLjIwOS0wLjAyMywwLjI5My0wLjA2OQ0KCQkJCQkJCQljMC4wODItMC4wNDYsMC4yMjUtMC4xNzgsMC40MTYtMC4zOTVMNzEuMjU0LDMuMjg2TDcxLjI1NCwzLjI4NnoiLz4NCgkJCQkJCTwvZz4NCgkJCQkJPC9nPg0KCQkJCTwvZz4NCgkJCTwvZz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjxnPg0KCTxnPg0KCQk8Zz4NCgkJCTxnPg0KCQkJCTxnPg0KCQkJCQk8ZGVmcz4NCgkJCQkJCTxyZWN0IGlkPSJTVkdJRF83XyIgeD0iNjkuOTU0IiB5PSI1OS43MzUiIHdpZHRoPSIxNS41NDkiIGhlaWdodD0iMTYuNzcxIi8+DQoJCQkJCTwvZGVmcz4NCgkJCQkJPGNsaXBQYXRoIGlkPSJTVkdJRF84XyI+DQoJCQkJCQk8dXNlIHhsaW5rOmhyZWY9IiNTVkdJRF83XyIgIG92ZXJmbG93PSJ2aXNpYmxlIi8+DQoJCQkJCTwvY2xpcFBhdGg+DQoJCQkJCTxnIGNsaXAtcGF0aD0idXJsKCNTVkdJRF84XykiPg0KCQkJCQkJPGcgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAgICAiPg0KCQkJCQkJCTxwYXRoIGZpbGw9IiMwRDBGMEYiIGQ9Ik03OC45MjIsNjMuMDI2YzAuNjI3LDAsMS4xODIsMC4xMzUsMS42NjQsMC40MDZjMC40NzksMC4yNywwLjg1NywwLjY2OSwxLjEzNSwxLjE5OA0KCQkJCQkJCQljMC4yNzMsMC41MjksMC40MSwxLjA3OCwwLjQxLDEuNjQ2YzAsMS4wMDctMC4yOTMsMi4wNjMtMC44ODEsMy4xN2MtMC41ODYsMS4xMDQtMS4zNTQsMS45NDktMi4zMDEsMi41MzENCgkJCQkJCQkJYy0wLjk0NSwwLjU4Mi0xLjkyNywwLjg3My0yLjkzOCwwLjg3M2MtMC43MjksMC0xLjM0MS0wLjE2LTEuODI4LTAuNDhjLTAuNDg4LTAuMzIxLTAuODUzLTAuNzQ1LTEuMDg1LTEuMjcxDQoJCQkJCQkJCWMtMC4yMzItMC41MjQtMC4zNTQtMS4wMzctMC4zNTQtMS41MzFjMC0wLjg3NSwwLjIxMS0xLjc0MiwwLjYzNy0yLjYwMmMwLjQyNy0wLjg1NiwwLjkzNC0xLjU3MywxLjUyMS0yLjE0Nw0KCQkJCQkJCQljMC41OS0wLjU3NSwxLjIxOS0xLjAxOCwxLjg4Ny0xLjMyN0M3Ny40NjEsNjMuMTgyLDc4LjE3LDYzLjAyNiw3OC45MjIsNjMuMDI2eiBNNzguNjg2LDYzLjQ3DQoJCQkJCQkJCWMtMC40NjQsMC0wLjkxOCwwLjExNC0xLjM1OSwwLjM0M2MtMC40NDMsMC4yMjktMC44ODQsMC42MDMtMS4zMiwxLjEyM2MtMC40MzYsMC41Mi0wLjgyNSwxLjItMS4xNzYsMi4wNDENCgkJCQkJCQkJYy0wLjQyOCwxLjAzNS0wLjY0MSwyLjAxLTAuNjQxLDIuOTMxYzAsMC42NTUsMC4xNywxLjIzNSwwLjUwOCwxLjc0MWMwLjM0LDAuNTA3LDAuODU5LDAuNzYsMS41NjEsMC43Ng0KCQkJCQkJCQljMC40MjQsMCwwLjgzOS0wLjEwNCwxLjI0Mi0wLjMxM2MwLjQwNS0wLjIxMSwwLjgyOC0wLjU2MywxLjI3MS0xLjA2NmMwLjU1My0wLjYzMywxLjAxOC0xLjQ0LDEuMzkzLTIuNDIxDQoJCQkJCQkJCWMwLjM3Ny0wLjk4MiwwLjU2My0xLjg5NywwLjU2My0yLjc0OGMwLTAuNjI4LTAuMTY5LTEuMTg0LTAuNTExLTEuNjY3Qzc5Ljg3OSw2My43MTEsNzkuMzY4LDYzLjQ3LDc4LjY4Niw2My40N3oiLz4NCgkJCQkJCTwvZz4NCgkJCQkJPC9nPg0KCQkJCTwvZz4NCgkJCTwvZz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBEMEYwRiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSI4IiBkPSINCglNNjYuNTksMTM2LjQyMmMzNC41NTEsMCw2Mi41NTYtMjYuODAxLDYyLjU1Ni01OS44NjRjMC0zMy4wNjMtMjguMDA1LTU5Ljg2Ni02Mi41NTYtNTkuODY2Yy0zNC41NTEsMC02Mi41NTYsMjYuODAxLTYyLjU1Niw1OS44NjYNCglDNC4wMzQsMTA5LjYyMywzMi4wMzksMTM2LjQyMiw2Ni41OSwxMzYuNDIyTDY2LjU5LDEzNi40MjJ6Ii8+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiNDQzc2MUYiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iOCIgeDE9IjY3LjI3MyIgeTE9Ijc2LjQyOCIgeDI9IjE0LjI0OSIgeTI9IjEwOC41MzYiLz4NCjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0NDNzYxRiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSI4IiB4MT0iNjcuMjczIiB5MT0iNzYuNDI4IiB4Mj0iMTE4LjkzMiIgeTI9IjEwOC41MzYiLz4NCjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0NDNzYxRiIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZS1taXRlcmxpbWl0PSI4IiB4MT0iNjcuMjczIiB5MT0iNzYuNDI4IiB4Mj0iNjcuMjczIiB5Mj0iMTYuNjkyIi8+DQo8bGluZSBmaWxsPSJub25lIiBzdHJva2U9IiMwRDBGMEYiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbWl0ZXJsaW1pdD0iOCIgeDE9IjE0LjI0OSIgeTE9IjEwOC41MzYiIHgyPSIxMTguOTMyIiB5Mj0iMTA4LjUzNiIvPg0KPGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMEQwRjBGIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjgiIHgxPSI2Ny4yNzMiIHkxPSIxNi42OTIiIHgyPSIxMTguOTMyIiB5Mj0iMTA4LjUzNiIvPg0KPGxpbmUgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMEQwRjBGIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLW1pdGVybGltaXQ9IjgiIHgxPSI2Ny4yNzMiIHkxPSIxNi42OTIiIHgyPSIxNC4yNDkiIHkyPSIxMDguNTM2Ii8+DQo8L3N2Zz4NCgo=" alt="" style="width:min(100%,250px);height:auto;display:block;margin:10px auto;">Радиус окружности, описанной около равностороннего треугольника, равен <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnPz4KPCEtLS0xLjgtLT4KPHN2ZyBoZWlnaHQ9JzExLjlwdCcgdmVyc2lvbj0nMS4xJyB2aWV3Qm94PScyMjQuNCA3Mi4zIDI0LjUgMTEuOScgd2lkdGg9JzI0LjVwdCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB4bWxuczp4bGluaz0naHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayc+CjxkZWZzPgo8cGF0aCBkPSdNNy4yIC0yLjVDNy4zIC0yLjUgNy41IC0yLjUgNy41IC0yLjdTNy4zIC0yLjkgNy4yIC0yLjlIMS4zQzEuMSAtMi45IDAuOSAtMi45IDAuOSAtMi43UzEuMSAtMi41IDEuMyAtMi41SDcuMlonIGlkPSdnMS0wJy8+CjxwYXRoIGQ9J000LjIgOS4zTDIuMyA1LjFDMi4yIDQuOSAyLjIgNC45IDIuMiA0LjlDMi4xIDQuOSAyLjEgNC45IDIgNUwwLjkgNS44QzAuOCA1LjkgMC44IDUuOSAwLjggNS45QzAuOCA2IDAuOCA2LjEgMC45IDYuMUMxIDYuMSAxLjIgNS45IDEuMyA1LjhDMS4zIDUuOCAxLjUgNS42IDEuNiA1LjZMMy44IDEwLjNDMy44IDEwLjQgMy45IDEwLjQgNCAxMC40QzQuMiAxMC40IDQuMiAxMC40IDQuMyAxMC4yTDkuMiAwQzkuMyAtMC4yIDkuMyAtMC4yIDkuMyAtMC4yQzkuMyAtMC4zIDkuMiAtMC40IDkuMSAtMC40QzkgLTAuNCA4LjkgLTAuNCA4LjggLTAuMkw0LjIgOS4zWicgaWQ9J2cxLTExMicvPgo8cGF0aCBkPSdNNS4yIC0xLjVMNSAtMS41QzQuNiAtMC45IDQuNSAtMC44IDQgLTAuOEgxLjRMMy4yIC0yLjdDNC4yIC0zLjcgNC42IC00LjYgNC42IC01LjRDNC42IC02LjUgMy43IC03LjMgMi42IC03LjNDMiAtNy4zIDEuNCAtNy4xIDEgLTYuN0MwLjcgLTYuMyAwLjUgLTYgMC4zIC01LjJMMC42IC01LjFDMSAtNi4yIDEuNCAtNi41IDIuMSAtNi41QzMuMSAtNi41IDMuNyAtNS45IDMuNyAtNUMzLjcgLTQuMiAzLjIgLTMuMiAyLjMgLTIuMkwwLjMgLTAuMVYwSDQuNkw1LjIgLTEuNVonIGlkPSdnMy01MCcvPgo8cGF0aCBkPSdNMS43IC0zLjZDMi4zIC0zLjYgMi42IC0zLjYgMi44IC0zLjVDMy41IC0zLjIgMy45IC0yLjYgMy45IC0xLjlDMy45IC0wLjkgMy4zIC0wLjIgMi41IC0wLjJDMi4yIC0wLjIgMiAtMC4zIDEuNiAtMC42QzEuMiAtMC44IDEuMSAtMC44IDAuOSAtMC44QzAuNiAtMC44IDAuNSAtMC43IDAuNSAtMC41QzAuNSAtMC4xIDAuOSAwLjIgMS43IDAuMkMyLjUgMC4yIDMuNCAtMC4xIDMuOSAtMC42UzQuNyAtMS43IDQuNyAtMi40QzQuNyAtMi45IDQuNSAtMy40IDQuMiAtMy44QzQgLTQgMy44IC00LjIgMy4zIC00LjRDNC4xIC00LjkgNC4zIC01LjMgNC4zIC01LjlDNC4zIC02LjcgMy42IC03LjMgMi42IC03LjNDMi4xIC03LjMgMS42IC03LjIgMS4yIC02LjhDMC45IC02LjUgMC43IC02LjIgMC41IC01LjZMMC43IC01LjVDMS4xIC02LjMgMS42IC02LjcgMi4zIC02LjdDMyAtNi43IDMuNSAtNi4yIDMuNSAtNS41QzMuNSAtNS4xIDMuMyAtNC43IDMgLTQuNUMyLjcgLTQuMiAyLjQgLTQgMS43IC0zLjdWLTMuNlonIGlkPSdnMy01MScvPgo8cGF0aCBkPSdNMi4xIC0wLjZDMi4xIC0wLjkgMS44IC0xLjIgMS41IC0xLjJTMC45IC0wLjkgMC45IC0wLjZTMS4yIDAgMS41IDBTMi4xIC0wLjMgMi4xIC0wLjZaJyBpZD0nZzctNTgnLz4KPHVzZSBpZD0nZzExLTUwJyB4bGluazpocmVmPScjZzMtNTAnLz4KPHVzZSBpZD0nZzExLTUxJyB4bGluazpocmVmPScjZzMtNTEnLz4KPC9kZWZzPgo8ZyBpZD0ncGFnZTEnPgoKPHVzZSB4PScyMjUuOScgeGxpbms6aHJlZj0nI2cxMS01MCcgeT0nODIuMycvPgo8dXNlIHg9JzIzMS4zJyB4bGluazpocmVmPScjZzEtMTEyJyB5PSc3Mi43Jy8+CjxyZWN0IGhlaWdodD0nMC40JyB3aWR0aD0nNS41JyB4PScyNDAuNCcgeT0nNzIuMycvPgo8dXNlIHg9JzI0MC40JyB4bGluazpocmVmPScjZzExLTUxJyB5PSc4Mi4zJy8+Cjx1c2UgeD0nMjQ1LjknIHhsaW5rOmhyZWY9JyNnNy01OCcgeT0nODIuMycvPgo8L2c+Cjwvc3ZnPg==" alt="" style="max-width:100%;height:auto;display:block;margin:10px auto;"> Найдите длину стороны этого треугольника.</div>
+  <div class="answer-row">
+    <label>Ваш ответ: <input class="ans" id="input_6" type="text" autocomplete="off" spellcheck="false"></label>
+    <span class="verdict" id="verdict_6"></span>
+  </div>
+</div>
+</div>
+</form>
+<div id="controls">
+  <button onclick="checkAll()">Проверить ответы</button>
+  <button class="secondary" onclick="copyResults()">Скопировать результат</button>
+  <span id="score"></span>
+  <span id="copyStatus"></span>
+</div>
+<footer class="brand">Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова</footer>
+</div>
+<script>
+const SEED = 907941643;
+const HASHES = {"1": [2490947230915176], "2": [6921390469205386], "3": [8714709567616097], "4": [4842365677752137], "5": [8628205647588394], "6": [1523162889045478]};
+function cyrb53(str, seed) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+const SUP = {"⁰":"0","¹":"1","²":"2","³":"3","⁴":"4","⁵":"5","⁶":"6","⁷":"7","⁸":"8","⁹":"9"};
+const CYR = {"а":"a","в":"b","с":"c","х":"x","у":"y","р":"p","о":"o","е":"e","к":"k","м":"m","т":"t"};
+function norm(raw) {
+  let s = (raw || "").toString().toLowerCase();
+  s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, t => "^" + [...t].map(c => SUP[c]).join(""));
+  s = s.replace(/[авсхуроекмт]/g, c => CYR[c]);
+  s = s.replace(/[−–—]/g, "-").replace(/,/g, ".").replace(/[\s*·⋅×°]/g, "");
+  return s;
+}
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+function parseRat(s) {
+  const m = s.match(/^([+-]?)(\d+)(?:\.(\d+))?(?:\/(\d+)(?:\.(\d+))?)?$/);
+  if (!m) return null;
+  const dec = m[3] || "";
+  let n = parseInt(m[2] + dec, 10), d = Math.pow(10, dec.length);
+  if (m[4] !== undefined) {
+    const dec2 = m[5] || "";
+    const n2 = parseInt(m[4] + dec2, 10), d2 = Math.pow(10, dec2.length);
+    if (n2 === 0) return null;
+    n = n * d2; d = d * n2;
+  }
+  if (m[1] === "-") n = -n;
+  const g = gcd(n, d);
+  return [n / g, d / g];
+}
+function parseMonoObj(s) {
+  const m = s.match(/^([+-]?)(?:\(([^)]*)\)|(\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?))?((?:[a-z](?:\^\d+)?)*)$/);
+  if (!m) return null;
+  const coefStr = m[2] !== undefined ? m[2] : m[3];
+  if (!coefStr && !m[4]) return null;
+  let coef = coefStr ? parseRat(coefStr) : [1, 1];
+  if (!coef) return null;
+  if (m[1] === "-") coef = [-coef[0], coef[1]];
+  const vars = {};
+  for (const t of m[4].matchAll(/([a-z])(?:\^(\d+))?/g)) {
+    vars[t[1]] = (vars[t[1]] || 0) + (t[2] ? parseInt(t[2], 10) : 1);
+  }
+  const letters = Object.keys(vars).sort().filter(k => vars[k]).map(k => k + "^" + vars[k]).join("");
+  return { coef, letters };
+}
+function parseMono(s) {
+  const o = parseMonoObj(s);
+  return o ? "m:" + o.coef[0] + "/" + o.coef[1] + "|" + o.letters : null;
+}
+// Многочлен стандартного вида: подобные слагаемые должны быть уже приведены.
+function parsePoly(s) {
+  const terms = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if ((ch === "+" || ch === "-") && depth === 0 && i > start) { terms.push(s.slice(start, i)); start = i; }
+  }
+  terms.push(s.slice(start));
+  const acc = {};
+  for (const t of terms) {
+    const o = parseMonoObj(t);
+    if (!o || o.coef[0] === 0 || o.letters in acc) return null;
+    acc[o.letters] = o.coef;
+  }
+  return "p:" + Object.keys(acc).sort().map(k => acc[k][0] + "/" + acc[k][1] + "|" + k).join(";");
+}
+function candidates(raw) {
+  const s = norm(raw);
+  const out = ["s:" + s];
+  const r = parseRat(s.replace(/^\((.*)\)$/, "$1"));
+  if (r) out.push("n:" + r[0] + "/" + r[1]);
+  const mono = parseMono(s);
+  if (mono) out.push(mono);
+  const poly = parsePoly(s);
+  if (poly) out.push(poly);
+  return out;
+}
+function isCorrect(taskNo, raw) {
+  if (!raw.trim()) return false;
+  const good = HASHES[taskNo];
+  return candidates(raw).some(c => good.includes(cyrb53(taskNo + ":" + c, SEED)));
+}
+// Две попытки: после второй проверки ответы блокируются. Число попыток
+// запоминается в браузере, чтобы перезагрузка страницы их не сбрасывала.
+const MAX_ATTEMPTS = 2;
+const STORE_KEY = "attempts:" + location.pathname + ":" + SEED;
+let state = { attempts: 0, answers: {} };
+let lastResults = null;
+function loadState() { try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { return null; } }
+function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+function inputOf(taskNo) { return document.getElementById("input_" + taskNo); }
+function checkButton() { return document.querySelector('button[onclick^="checkAll"]'); }
+function setStatus(text) { document.getElementById("copyStatus").textContent = text; }
+function computeResults() {
+  let correctCount = 0;
+  const rows = [];
+  for (const taskNo in HASHES) {
+    const value = inputOf(taskNo).value;
+    const ok = isCorrect(taskNo, value);
+    if (ok) correctCount++;
+    rows.push({ taskNo, isCorrect: ok, userAnswer: value.trim() });
+  }
+  return { correctCount, total: Object.keys(HASHES).length, rows };
+}
+function attemptsNote() {
+  const left = MAX_ATTEMPTS - state.attempts;
+  return left > 0 ? " · осталась " + left + " попытка" : " · попытки закончились";
+}
+function showResults() {
+  const { correctCount, total, rows } = lastResults;
+  for (const row of rows) {
+    const verdict = document.getElementById("verdict_" + row.taskNo);
+    if (row.isCorrect) {
+      verdict.textContent = "Верно";
+      verdict.className = "verdict correct";
+    } else {
+      verdict.textContent = row.userAnswer ? "Неверно" : "Нет ответа";
+      verdict.className = "verdict wrong";
+    }
+  }
+  document.getElementById("score").textContent = "Результат: " + correctCount + " из " + total + attemptsNote();
+}
+function lockIfDone() {
+  if (state.attempts < MAX_ATTEMPTS) return;
+  for (const taskNo in HASHES) inputOf(taskNo).disabled = true;
+  const btn = checkButton();
+  if (btn) { btn.disabled = true; btn.textContent = "Попытки закончились"; btn.style.opacity = "0.55"; btn.style.cursor = "default"; }
+}
+function checkAll() {
+  if (state.attempts >= MAX_ATTEMPTS) return;
+  const answers = {};
+  let filled = 0;
+  for (const taskNo in HASHES) {
+    answers[taskNo] = inputOf(taskNo).value;
+    if (answers[taskNo].trim()) filled++;
+  }
+  if (filled === 0) { setStatus("Сначала решите задания и впишите ответы — попытка не потрачена."); return; }
+  if (state.attempts === MAX_ATTEMPTS - 1 &&
+      !confirm("Это последняя попытка. После проверки ответы нельзя будет изменить. Проверить?")) return;
+  state.attempts++;
+  state.answers = answers;
+  saveState();
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+  setStatus(state.attempts < MAX_ATTEMPTS ? "Исправьте ошибки и проверьте ещё раз." : "");
+}
+function copyResults() {
+  if (!lastResults) { setStatus("Сначала нажмите «Проверить ответы»."); return; }
+  const { correctCount, total, rows } = lastResults;
+  const lines = [document.title + " — результат: " + correctCount + " из " + total +
+                 " (попытка " + state.attempts + " из " + MAX_ATTEMPTS + ")", ""];
+  for (const row of rows) {
+    if (row.isCorrect) lines.push("✅ №" + row.taskNo + " (" + row.userAnswer + ")");
+    else lines.push("❌ №" + row.taskNo + " (мой ответ: " + (row.userAnswer || "—") + ")");
+  }
+  const ta = document.createElement("textarea");
+  ta.value = lines.join("\n");
+  ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  setStatus(ok ? "Скопировано! Отправьте учителю." : "Не удалось скопировать автоматически — выделите текст вручную.");
+}
+(function restore() {
+  const saved = loadState();
+  if (!saved || !saved.attempts) return;
+  state = saved;
+  for (const taskNo in HASHES) if (state.answers[taskNo] !== undefined) inputOf(taskNo).value = state.answers[taskNo];
+  lastResults = computeResults();
+  showResults();
+  lockIfDone();
+})();
+</script>
+</body>
+</html>
