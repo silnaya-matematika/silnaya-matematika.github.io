@@ -144,6 +144,14 @@
   .opts { margin: 8px 0 4px; line-height: 1.55; }
   .note { color: var(--muted); font-size: 0.88rem; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
   .expr { white-space: normal; }
+
+  @media (max-width: 520px) {
+    .sheet-card { padding: 6px 14px 4px; }
+    .task { grid-template-columns: 1fr; gap: 8px; }
+    .task-num { width: 32px; height: 32px; font-size: 0.95rem; }
+    .answer-row { grid-column: 1; }
+    .fig svg { width: 100%; height: auto; }
+  }
 </style>
 </head>
 <body>
