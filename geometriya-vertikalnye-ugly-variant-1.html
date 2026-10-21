@@ -153,8 +153,21 @@
     .fig svg { width: 100%; height: auto; }
   }
 </style>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113722554', 'ym');
+    ym(113722554, 'init', {ssr:true, clickmap:true, referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<!-- /Yandex.Metrika counter -->
 </head>
 <body>
+<noscript><div><img src="https://mc.yandex.ru/watch/113722554" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+
 <svg class="doodle doodle-sun" width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="23" cy="23" r="9"/><path d="M23 2v7M23 37v7M2 23h7M37 23h7M8 8l5 5M33 33l5 5M38 8l-5 5M13 33l-5 5"/></svg>
 <svg class="doodle doodle-bow" width="50" height="42" viewBox="0 0 50 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M25 18c-6-10-22-10-22 0 0 8 14 8 22 14 8-6 22-6 22-14 0-10-16-10-22 0Z"/><path d="M25 18v22"/></svg>
 <svg class="doodle doodle-shell" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 6c9 3 15 11 15 21H6c0-10 6-18 15-21Z"/><path d="M21 8v19M14 12l3 15M28 12l-3 15"/></svg>
@@ -267,6 +280,7 @@
 </div>
 <script>
 const SEED = 1625983130;
+const METRIKA_ID = 113722554;
 const HASHES = {"1": [8718810928552585], "2": [5503245287607212], "3": [467055724378520], "4": [8112446456068359], "5": [1635952056177646], "6": [5970375073790837], "7": [7425279001180564], "8": [7529648298124067], "9": [7731259363284284], "10": [3264840931910595]};
 function cyrb53(str, seed) {
   let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -344,9 +358,32 @@ function parsePoly(s) {
   }
   return "p:" + Object.keys(acc).sort().map(k => acc[k][0] + "/" + acc[k][1] + "|" + k).join(";");
 }
+// Обыкновенные дроби: «3/4», «7/4» или смешанное «1 3/4»; запись должна быть несократимой.
+function parseFrac(raw) {
+  const t = (raw || "").toString().replace(/\u00a0/g, " ").replace(/[−–—]/g, "-").trim();
+  const neg = t[0] === "-";
+  const u = (neg ? t.slice(1) : t).trim();
+  const sg = neg ? "-" : "";
+  let m = u.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)$/);
+  if (m) {
+    const w = parseInt(m[1], 10), n = parseInt(m[2], 10), d = parseInt(m[3], 10);
+    if (d < 2 || n < 1 || n >= d || gcd(n, d) !== 1) return null;
+    return "f:" + sg + (w * d + n) + "/" + d;
+  }
+  m = u.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (m) {
+    const n = parseInt(m[1], 10), d = parseInt(m[2], 10);
+    if (d < 1 || gcd(n, d) !== 1) return null;
+    return "f:" + sg + n + "/" + d;
+  }
+  m = u.match(/^\d+$/);
+  return m ? "f:" + sg + parseInt(u, 10) + "/1" : null;
+}
 function candidates(raw) {
   const s = norm(raw);
   const out = ["s:" + s];
+  const fr = parseFrac(raw);
+  if (fr) out.push(fr);
   const r = parseRat(s.replace(/^\((.*)\)$/, "$1"));
   if (r) out.push("n:" + r[0] + "/" + r[1]);
   const mono = parseMono(s);
@@ -424,6 +461,18 @@ function checkAll() {
   showResults();
   lockIfDone();
   setStatus(state.attempts < MAX_ATTEMPTS ? "Исправьте ошибки и проверьте ещё раз." : "");
+  reportToMetrika();
+}
+// Статистика в Яндекс Метрику: какой тест проверяли, какая попытка, сколько верно (без имён и ответов).
+function reportToMetrika() {
+  try {
+    if (typeof ym !== "function") return;
+    const { correctCount, total } = lastResults;
+    const info = { test: document.title, attempt: state.attempts, score: correctCount + "/" + total };
+    ym(METRIKA_ID, "reachGoal", "check_answers", info);
+    const visit = {}; visit[document.title] = { ["попытка " + state.attempts]: correctCount + " из " + total };
+    ym(METRIKA_ID, "params", { "проверка ответов": visit });
+  } catch (e) {}
 }
 function copyResults() {
   if (!lastResults) { setStatus("Сначала нажмите «Проверить ответы»."); return; }

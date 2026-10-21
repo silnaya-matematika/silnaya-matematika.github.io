@@ -131,8 +131,21 @@
     letter-spacing: 0.01em;
   }
 </style>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113722554', 'ym');
+    ym(113722554, 'init', {ssr:true, clickmap:true, referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<!-- /Yandex.Metrika counter -->
 </head>
 <body>
+<noscript><div><img src="https://mc.yandex.ru/watch/113722554" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+
 <svg class="doodle doodle-sun" width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="23" cy="23" r="9"/><path d="M23 2v7M23 37v7M2 23h7M37 23h7M8 8l5 5M33 33l5 5M38 8l-5 5M13 33l-5 5"/></svg>
 <svg class="doodle doodle-bow" width="50" height="42" viewBox="0 0 50 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M25 18c-6-10-22-10-22 0 0 8 14 8 22 14 8-6 22-6 22-14 0-10-16-10-22 0Z"/><path d="M25 18v22"/></svg>
 <svg class="doodle doodle-shell" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 6c9 3 15 11 15 21H6c0-10 6-18 15-21Z"/><path d="M21 8v19M14 12l3 15M28 12l-3 15"/></svg>
@@ -324,6 +337,7 @@
 </div>
 <script>
 const SEED = 1417694851;
+const METRIKA_ID = 113722554;
 const HASHES = {"1": [5954854261205185], "2": [1349862367626704], "3": [2711502208370420], "4": [2199948838870290], "5": [7818354449555048], "6": [4837453199910564], "7": [2226273352329695], "8": [4438139797237904], "9": [6657128617101606], "10": [2416549332534496], "11": [7044170779827344], "12": [4618822325701478], "13": [2122256034551010], "14": [2840227051873610], "15": [7099362988478951], "16": [3720293985898006], "17": [6151891052316082], "18": [7427419252844412], "19": [2251602228907768], "20": [1365519653926654]};
 function cyrb53(str, seed) {
   let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
@@ -344,7 +358,7 @@ function norm(raw) {
   let s = (raw || "").toString().toLowerCase();
   s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, t => "^" + [...t].map(c => SUP[c]).join(""));
   s = s.replace(/[авсхуроекмт]/g, c => CYR[c]);
-  s = s.replace(/[−–—]/g, "-").replace(/,/g, ".").replace(/[\s*·⋅×]/g, "");
+  s = s.replace(/[−–—]/g, "-").replace(/,/g, ".").replace(/[\s*·⋅×°]/g, "");
   return s;
 }
 function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
@@ -363,7 +377,7 @@ function parseRat(s) {
   const g = gcd(n, d);
   return [n / g, d / g];
 }
-function parseMono(s) {
+function parseMonoObj(s) {
   const m = s.match(/^([+-]?)(?:\(([^)]*)\)|(\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?))?((?:[a-z](?:\^\d+)?)*)$/);
   if (!m) return null;
   const coefStr = m[2] !== undefined ? m[2] : m[3];
@@ -376,15 +390,63 @@ function parseMono(s) {
     vars[t[1]] = (vars[t[1]] || 0) + (t[2] ? parseInt(t[2], 10) : 1);
   }
   const letters = Object.keys(vars).sort().filter(k => vars[k]).map(k => k + "^" + vars[k]).join("");
-  return "m:" + coef[0] + "/" + coef[1] + "|" + letters;
+  return { coef, letters };
+}
+function parseMono(s) {
+  const o = parseMonoObj(s);
+  return o ? "m:" + o.coef[0] + "/" + o.coef[1] + "|" + o.letters : null;
+}
+// Многочлен стандартного вида: подобные слагаемые должны быть уже приведены.
+function parsePoly(s) {
+  const terms = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if ((ch === "+" || ch === "-") && depth === 0 && i > start) { terms.push(s.slice(start, i)); start = i; }
+  }
+  terms.push(s.slice(start));
+  const acc = {};
+  for (const t of terms) {
+    const o = parseMonoObj(t);
+    if (!o || o.coef[0] === 0 || o.letters in acc) return null;
+    acc[o.letters] = o.coef;
+  }
+  return "p:" + Object.keys(acc).sort().map(k => acc[k][0] + "/" + acc[k][1] + "|" + k).join(";");
+}
+// Обыкновенные дроби: «3/4», «7/4» или смешанное «1 3/4»; запись должна быть несократимой.
+function parseFrac(raw) {
+  const t = (raw || "").toString().replace(/\u00a0/g, " ").replace(/[−–—]/g, "-").trim();
+  const neg = t[0] === "-";
+  const u = (neg ? t.slice(1) : t).trim();
+  const sg = neg ? "-" : "";
+  let m = u.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)$/);
+  if (m) {
+    const w = parseInt(m[1], 10), n = parseInt(m[2], 10), d = parseInt(m[3], 10);
+    if (d < 2 || n < 1 || n >= d || gcd(n, d) !== 1) return null;
+    return "f:" + sg + (w * d + n) + "/" + d;
+  }
+  m = u.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (m) {
+    const n = parseInt(m[1], 10), d = parseInt(m[2], 10);
+    if (d < 1 || gcd(n, d) !== 1) return null;
+    return "f:" + sg + n + "/" + d;
+  }
+  m = u.match(/^\d+$/);
+  return m ? "f:" + sg + parseInt(u, 10) + "/1" : null;
 }
 function candidates(raw) {
   const s = norm(raw);
   const out = ["s:" + s];
+  const fr = parseFrac(raw);
+  if (fr) out.push(fr);
   const r = parseRat(s.replace(/^\((.*)\)$/, "$1"));
   if (r) out.push("n:" + r[0] + "/" + r[1]);
   const mono = parseMono(s);
   if (mono) out.push(mono);
+  const poly = parsePoly(s);
+  if (poly) out.push(poly);
   return out;
 }
 function isCorrect(taskNo, raw) {
@@ -456,6 +518,18 @@ function checkAll() {
   showResults();
   lockIfDone();
   setStatus(state.attempts < MAX_ATTEMPTS ? "Исправьте ошибки и проверьте ещё раз." : "");
+  reportToMetrika();
+}
+// Статистика в Яндекс Метрику: какой тест проверяли, какая попытка, сколько верно (без имён и ответов).
+function reportToMetrika() {
+  try {
+    if (typeof ym !== "function") return;
+    const { correctCount, total } = lastResults;
+    const info = { test: document.title, attempt: state.attempts, score: correctCount + "/" + total };
+    ym(METRIKA_ID, "reachGoal", "check_answers", info);
+    const visit = {}; visit[document.title] = { ["попытка " + state.attempts]: correctCount + " из " + total };
+    ym(METRIKA_ID, "params", { "проверка ответов": visit });
+  } catch (e) {}
 }
 function copyResults() {
   if (!lastResults) { setStatus("Сначала нажмите «Проверить ответы»."); return; }
