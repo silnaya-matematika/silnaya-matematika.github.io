@@ -1,10 +1,171 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="card-title" content="Признаки равенства треугольников · тренажёр">
 <meta name="task-count" content="10">
 <title>Признаки равенства треугольников — Сильная математика</title>
 <style>
-:root{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#352a46;background:#f8f5fd}*{box-sizing:border-box}body{margin:0}.app{max-width:720px;margin:auto;padding:22px 16px 34px}.brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8060b1}.heading{font-size:clamp(25px,5vw,35px);line-height:1.16;margin:10px 0}.sub{color:#726784;margin:0 0 20px}.panel{background:white;border:1px solid #e8dff3;border-radius:22px;padding:20px;box-shadow:0 8px 28px #654d8d11}.top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}.pill{background:#eee5fa;border-radius:20px;padding:6px 11px;color:#7045a5;font-size:12px}.progress{height:7px;background:#eeeaf5;border-radius:9px;overflow:hidden;margin:16px 0}.bar{height:100%;background:#a278d4;transition:width .2s}.diagram{background:#faf7ff;border-radius:15px;margin:12px 0;padding:6px}.diagram svg{width:100%;height:auto;display:block}.question{font-size:19px;font-weight:750;margin:18px 0 6px;line-height:1.35}.hint{color:#716881;font-size:14px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.answers.one{grid-template-columns:1fr}.choice{border:1.5px solid #e0d5ee;background:white;border-radius:13px;padding:13px 10px;font-size:15px;font-weight:650;color:#49385c;cursor:pointer;line-height:1.3}.choice:hover,.choice:focus-visible{border-color:#9872d0;background:#faf6ff}.choice.chosen{border-color:#885ac8;background:#f3eafa}.choice.right{border-color:#4aa76f;background:#e9f8ef}.choice:disabled{cursor:default}.feedback{border-radius:12px;background:#f1ecf9;padding:13px 14px;margin:16px 0;font-size:14px;line-height:1.5}.feedback.good{background:#e9f8ef;color:#255d40}.feedback.bad{background:#fff0ef;color:#863c46}.controls{display:flex;justify-content:space-between;gap:12px;margin-top:16px}button.primary,button.secondary{padding:12px 18px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}button.primary{background:#8655c7;color:white;border:0}button.primary:disabled{opacity:.4;cursor:default}button.secondary{background:white;border:1px solid #d9cae8;color:#6d4e93}.end{text-align:center;padding:30px 0}.end h2{font-size:30px}.footer{text-align:center;font-size:13px;margin:22px 0;color:#8b7b9d}.vl{font-size:14px;fill:#3d2f55;font-weight:700;font-family:Georgia,serif}.num{font-size:12.5px;fill:#6a4fc4;font-weight:700}@media(max-width:420px){.panel{padding:15px}.answers{gap:8px}.choice{font-size:13px}.app{padding:17px 12px}}
-</style><!-- Yandex.Metrika counter -->
+  :root {
+    --bg: #f5f1fb;
+    --surface: #ffffff;
+    --surface-2: #ece2f9;
+    --ink: #2e2558;
+    --muted: #7c749a;
+    --hairline: #ddceef;
+    --accent: #6a4fc4;
+    --accent-soft: #ece2f9;
+    --correct: #2f8f5b;
+    --wrong: #c0392b;
+    --serif: Georgia, "PT Serif", "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    font-family: var(--serif);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 20px 60px;
+    color: var(--ink);
+    background: var(--bg);
+    position: relative;
+  }
+  .doodle { position: absolute; opacity: 0.5; pointer-events: none; z-index: 0; color: var(--accent); }
+  .doodle-text { font-family: var(--serif); font-weight: 700; font-style: italic; }
+  .doodle-sun   { top: 1%;  left: -64px; }
+  .doodle-bow   { top: 1%;  right: -66px; }
+  .doodle-sqrt  { top: 12%; right: -58px; font-size: 1.7rem; transform: rotate(6deg); }
+  .doodle-heart { top: 16%; left: -54px; }
+  .doodle-x2    { top: 27%; right: -50px; font-size: 1.6rem; transform: rotate(-7deg); }
+  .doodle-dots  { top: 34%; left: -48px; }
+  .doodle-flower{ top: 44%; right: -56px; }
+  .doodle-frac  { top: 52%; left: -50px; font-size: 1.5rem; transform: rotate(5deg); }
+  .doodle-pencil{ top: 63%; right: -60px; }
+  .doodle-star2 { top: 70%; left: -50px; }
+  .doodle-notebook { top: 80%; right: -56px; }
+  .doodle-shell { bottom: 0%; left: -45px; }
+  .doodle-star  { bottom: 1%; right: -48px; }
+  @media (max-width: 1040px) { .doodle { display: none; } }
+
+  .sheet { position: relative; z-index: 1; }
+
+  h1 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .variant-badge {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 24px;
+    background: var(--surface-2);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 8px 22px;
+    border-radius: 999px;
+  }
+
+  #controls {
+    background: var(--bg);
+    padding: 12px 0;
+    margin: 24px 0 0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+  }
+  button {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    background: var(--accent); color: #fff; border: none;
+    padding: 10px 18px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #5a41ae; }
+  button.secondary { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); }
+  button.secondary:hover { background: var(--accent-soft); }
+  #score { font-weight: 700; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  #copyStatus { color: var(--correct); font-size: 0.9rem; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+
+  .sheet-card {
+    background: var(--surface);
+    border: 1.5px solid var(--hairline);
+    border-radius: 18px;
+    padding: 8px 26px 4px;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 6px 14px;
+    padding: 22px 0;
+    border-bottom: 1px dashed var(--hairline);
+  }
+  .task:last-child { border-bottom: none; }
+  .task-num {
+    width: 38px; height: 38px;
+    background: var(--surface-2);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem;
+  }
+  .task-q { padding-top: 5px; line-height: 1.6; }
+  .task-q img { display: inline-block; vertical-align: middle; max-width: 100%; }
+  .answer-row { grid-column: 2; margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  input.ans {
+    font-family: -apple-system, Segoe UI, Arial, sans-serif;
+    padding: 8px 10px; font-size: 1rem; border: 1px solid var(--hairline);
+    border-radius: 6px; width: 160px; background: #fff; color: var(--ink);
+  }
+  .verdict { font-weight: 600; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .verdict.correct { color: var(--correct); }
+  .verdict.wrong { color: var(--wrong); }
+
+  footer.brand {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 1.5px dashed var(--hairline);
+    text-align: center;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+  }
+
+  .panel { padding: 22px 26px 24px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 700;
+         font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .pill { background: var(--surface-2); color: var(--accent); border-radius: 999px; padding: 5px 12px; font-size: .85rem; }
+  .progress { height: 7px; background: var(--surface-2); border-radius: 9px; overflow: hidden; margin: 14px 0 6px; }
+  .bar { height: 100%; background: var(--accent); transition: width .2s; }
+  .diagram { background: #faf7ff; border: 1px solid var(--hairline); border-radius: 12px; margin: 14px 0 6px; padding: 4px; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .question { font-size: 1.1rem; font-weight: 700; margin: 16px 0 6px; line-height: 1.5; }
+  .hint { color: var(--muted); font-size: .88rem; line-height: 1.45; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .answers.one { grid-template-columns: 1fr; }
+  .choice { background: var(--surface); color: var(--accent); border: 1px solid var(--accent); border-radius: 8px;
+            padding: 12px 10px; font-size: .95rem; font-weight: 600; line-height: 1.35; }
+  .choice:hover, .choice:focus-visible { background: var(--accent-soft); }
+  .choice.chosen { background: var(--accent-soft); }
+  .choice.right { border-color: var(--correct); background: #e8f5ee; color: var(--correct); }
+  .choice.wrongpick { border-color: var(--wrong); background: #fdecea; color: var(--wrong); }
+  .choice:disabled { cursor: default; opacity: 1; }
+  .feedback { border-radius: 10px; background: var(--accent-soft); padding: 12px 14px; margin: 16px 0 4px; font-size: .92rem;
+              line-height: 1.5; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .feedback.good { background: #e8f5ee; color: #205f3d; }
+  .feedback.bad { background: #fdecea; color: #8a2a20; }
+  .controls { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+  button:disabled { opacity: .4; cursor: default; }
+  button:disabled:hover { background: var(--accent); }
+  .end { text-align: center; padding: 26px 0 10px; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  .end h2 { font-size: 1.5rem; margin: 8px 0; }
+  .vl { font-size: 14px; fill: #3d2f55; font-weight: 700; font-family: Georgia, serif; }
+  @media (max-width: 520px) { .panel { padding: 16px 14px 18px; } .answers { gap: 8px; } .choice { font-size: .85rem; padding: 11px 8px; }
+                              .sheet-card { padding: 4px 12px; } }
+</style>
+<!-- Yandex.Metrika counter -->
 <script type="text/javascript">
     (function(m,e,t,r,i,k,a){
         m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -15,9 +176,32 @@
     ym(113722554, 'init', {ssr:true, clickmap:true, referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
 </script>
 <!-- /Yandex.Metrika counter -->
-</head><body>
+</head>
+<body>
 <noscript><div><img src="https://mc.yandex.ru/watch/113722554" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<main class="app"><div class="brand">✦ Сильная математика</div><h1 class="heading">Признаки равенства треугольников</h1><p class="sub">7 класс · Интерактивный тренажёр · 10 заданий · каждый раз новый набор</p><section class="panel" id="screen"></section><div class="footer">Сильная математика | Людмила Кузнецова</div></main><script>
+
+<svg class="doodle doodle-sun" width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="23" cy="23" r="9"/><path d="M23 2v7M23 37v7M2 23h7M37 23h7M8 8l5 5M33 33l5 5M38 8l-5 5M13 33l-5 5"/></svg>
+<svg class="doodle doodle-bow" width="50" height="42" viewBox="0 0 50 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M25 18c-6-10-22-10-22 0 0 8 14 8 22 14 8-6 22-6 22-14 0-10-16-10-22 0Z"/><path d="M25 18v22"/></svg>
+<svg class="doodle doodle-shell" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 6c9 3 15 11 15 21H6c0-10 6-18 15-21Z"/><path d="M21 8v19M14 12l3 15M28 12l-3 15"/></svg>
+<svg class="doodle doodle-star" width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<span class="doodle doodle-text doodle-sqrt">&radic;a</span>
+<svg class="doodle doodle-heart" width="36" height="32" viewBox="0 0 36 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 29C7 21 2 15 2 9.5 2 4.8 5.6 2 9.6 2c3 0 5.8 1.8 8.4 6 2.6-4.2 5.4-6 8.4-6 4 0 7.6 2.8 7.6 7.5 0 5.5-5 11.5-16 19.5Z"/></svg>
+<span class="doodle doodle-text doodle-x2">x&sup2;</span>
+<svg class="doodle doodle-dots" width="34" height="34" viewBox="0 0 34 34" fill="currentColor"><circle cx="4" cy="6" r="2.2"/><circle cx="16" cy="4" r="2.2"/><circle cx="28" cy="9" r="2.2"/><circle cx="8" cy="18" r="2.2"/><circle cx="22" cy="20" r="2.2"/><circle cx="14" cy="30" r="2.2"/></svg>
+<svg class="doodle doodle-flower" width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="3.4"/><ellipse cx="19" cy="8" rx="4.4" ry="6.5"/><ellipse cx="19" cy="30" rx="4.4" ry="6.5"/><ellipse cx="8" cy="19" rx="6.5" ry="4.4"/><ellipse cx="30" cy="19" rx="6.5" ry="4.4"/></svg>
+<span class="doodle doodle-text doodle-frac">a&frasl;b</span>
+<svg class="doodle doodle-pencil" width="42" height="42" viewBox="0 0 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 35l1.5-8L28 7.5l6.5 6.5L15 34.5 7 36Z"/><path d="M25.5 10.5l6.5 6.5M8.5 27l6.5 6.5"/></svg>
+<svg class="doodle doodle-star2" width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20 4l4.5 11.5L36 20l-11.5 4.5L20 36l-4.5-11.5L4 20l11.5-4.5Z"/></svg>
+<svg class="doodle doodle-notebook" width="34" height="40" viewBox="0 0 34 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="26" height="36" rx="2.5"/><path d="M10 12h14M10 19h14M10 26h9"/></svg>
+
+<div class="sheet"><noscript><div style="background:#fdecea;color:#8a1c12;border:1px solid #f5c2bc;border-radius:10px;padding:12px 16px;margin:0 0 16px;font-family:-apple-system,Arial,sans-serif;">Проверка ответов здесь не работает. Откройте тест по ссылке в браузере (Safari или Chrome).</div></noscript>
+<h1>Признаки равенства треугольников</h1>
+<div class="variant-badge">Тренажёр</div>
+<div class="hint" style="text-align:center;margin:-8px 0 18px">7 класс · 10 заданий · каждый раз новый набор</div>
+<div class="sheet-card"><section class="panel" id="screen"></section></div>
+<footer class="brand">Сильная математика&nbsp;&nbsp;|&nbsp;&nbsp;Людмила Кузнецова</footer>
+</div>
+<script>
 // ---------- мелкие помощники ----------
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const randint = n => Math.floor(Math.random() * n);
@@ -346,15 +530,17 @@ function report() {
 function render() {
   if (idx === tasks.length) {
     report();
-    root.innerHTML = `<div class="end"><div style="font-size:45px">🎓</div><h2>Тренажёр пройден!</h2><p style="font-size:22px;font-weight:700">${score} из ${tasks.length} верно</p><p>${score === tasks.length ? 'Отлично! Ты уверенно узнаёшь признаки равенства.' : score >= 7 ? 'Хорошая работа! Нажми «Пройти ещё раз» — задания будут новые.' : 'Повтори признаки и попробуй ещё раз — задания будут новые.'}</p><button class="primary" onclick="restart()">Пройти ещё раз</button></div>`;
+    root.innerHTML = `<div class="end"><div style="font-size:45px">🎓</div><h2>Тренажёр пройден!</h2><p style="font-size:22px;font-weight:700">${score} из ${tasks.length} верно</p><p>${score === tasks.length ? 'Отлично! Ты уверенно узнаёшь признаки равенства.' : score >= 7 ? 'Хорошая работа! Нажми «Пройти ещё раз» — задания будут новые.' : 'Повтори признаки и попробуй ещё раз — задания будут новые.'}</p><button onclick="restart()">Пройти ещё раз</button></div>`;
     return;
   }
   const q = tasks[idx]; prepare(q);
   const cls = q.long || q._opts.some(x => x.o.length > 26) && !/см|°/.test(q._opts[0].o) ? 'answers one' : 'answers';
-  root.innerHTML = `<div class="top"><span>Задание ${idx + 1} из ${tasks.length}</span><span class="pill">Верно: ${score}</span></div><div class="progress"><div class="bar" style="width:${idx / tasks.length * 100}%"></div></div>${q.svg ? `<div class="diagram">${q.svg}</div>` : ''}<div class="question">${q.ask}</div>${q.hint && hints[q.hint] ? `<div class="hint">${hints[q.hint]}</div>` : ''}<div class="${cls}">${q._opts.map((x, i) => `<button class="choice ${done && x.ok ? 'right' : selected === i ? 'chosen' : ''}" onclick="choose(${i})" ${done ? 'disabled' : ''}>${x.o}</button>`).join('')}</div>${done ? `<div class="feedback ${q._opts[selected].ok ? 'good' : 'bad'}"><strong>${q._opts[selected].ok ? 'Верно!' : 'Не совсем. Правильный ответ: ' + q._opts.find(x => x.ok).o + '.'}</strong><div>${q.exp}</div></div>` : ''}<div class="controls"><button class="secondary" onclick="restart()">С начала</button><button class="primary" ${done ? '' : 'disabled'} onclick="next()">${idx === tasks.length - 1 ? 'Результат' : 'Дальше →'}</button></div>`;
+  root.innerHTML = `<div class="top"><span>Задание ${idx + 1} из ${tasks.length}</span><span class="pill">Верно: ${score}</span></div><div class="progress"><div class="bar" style="width:${idx / tasks.length * 100}%"></div></div>${q.svg ? `<div class="diagram">${q.svg}</div>` : ''}<div class="question">${q.ask}</div>${q.hint && hints[q.hint] ? `<div class="hint">${hints[q.hint]}</div>` : ''}<div class="${cls}">${q._opts.map((x, i) => `<button class="choice ${done && x.ok ? 'right' : done && selected === i ? 'wrongpick' : selected === i ? 'chosen' : ''}" onclick="choose(${i})" ${done ? 'disabled' : ''}>${x.o}</button>`).join('')}</div>${done ? `<div class="feedback ${q._opts[selected].ok ? 'good' : 'bad'}"><strong>${q._opts[selected].ok ? 'Верно!' : 'Не совсем. Правильный ответ: ' + q._opts.find(x => x.ok).o + '.'}</strong><div>${q.exp}</div></div>` : ''}<div class="controls"><button class="secondary" onclick="restart()">С начала</button><button ${done ? '' : 'disabled'} onclick="next()">${idx === tasks.length - 1 ? 'Результат' : 'Дальше →'}</button></div>`;
 }
 function choose(i) { if (done) return; selected = i; done = true; if (tasks[idx]._opts[i].ok) score++; render(); }
 function next() { if (!done) return; idx++; selected = null; done = false; render(); }
 function restart() { tasks = makeSet(); idx = 0; score = 0; selected = null; done = false; render(); }
 render();
-</script></body></html>
+</script>
+</body>
+</html>
